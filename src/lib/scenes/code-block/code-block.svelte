@@ -1,49 +1,131 @@
 <script module lang="ts">
 	export interface CodeLine {
+		id?: string;
 		content: string;
 		highlighted?: boolean;
 		dimmed?: boolean;
 	}
 
+	export type SupportedLanguage = 'javascript' | 'typescript' | 'svelte' | 'html' | 'css' | 'json';
+
 	export interface CodeBlockState {
-		language: string;
+		language: SupportedLanguage;
 		lines: CodeLine[];
 	}
 </script>
 
 <script lang="ts">
+	import css from '@shikijs/langs/css';
+	import html from '@shikijs/langs/html';
+	import javascript from '@shikijs/langs/javascript';
+	import json from '@shikijs/langs/json';
+	import svelte from '@shikijs/langs/svelte';
+	import typescript from '@shikijs/langs/typescript';
+	import vesper from '@shikijs/themes/vesper';
+	import { quintOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { createHighlighterCore } from 'shiki/core';
+	import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 	import { cn } from '$lib/utils.js';
+
+	const supportedLanguages = [
+		'javascript',
+		'typescript',
+		'svelte',
+		'html',
+		'css',
+		'json'
+	] as const satisfies readonly SupportedLanguage[];
+
+	interface Token {
+		content: string;
+		color?: string;
+		fontStyle?: number;
+	}
+
+	type TokenLine = Token[];
+
+	const highlighter = createHighlighterCore({
+		engine: createJavaScriptRegexEngine(),
+		langs: [javascript, typescript, svelte, html, css, json],
+		themes: [vesper]
+	});
+
+	const normalizeLang = (language: SupportedLanguage): SupportedLanguage => {
+		const lang = language.trim().toLowerCase();
+
+		return supportedLanguages.includes(lang as SupportedLanguage)
+			? (lang as SupportedLanguage)
+			: language;
+	};
 
 	interface Props {
 		state: CodeBlockState;
 	}
 
-	const { state }: Props = $props();
+	// eslint-disable-next-line svelte/no-unused-props -- false positive: `language` and `lines` are used via the `scene` alias. Tracked in eslint-plugin-svelte#1142 / #1172.
+	const { state: scene }: Props = $props();
+
+	let tokens = $state.raw<TokenLine[]>([]);
+	let highlightedLanguage = $state<SupportedLanguage | undefined>();
+
+	const code = $derived(scene.lines.map((line) => line.content).join('\n'));
+
+	$effect(() => {
+		const language = scene.language;
+		const source = code;
+		let cancelled = false;
+
+		const highlight = async () => {
+			const shiki = await highlighter;
+			const lang = normalizeLang(language);
+
+			if (cancelled) return;
+
+			tokens = shiki.codeToTokens(source || ' ', { lang, theme: 'vesper' }).tokens as TokenLine[];
+			highlightedLanguage = language;
+		};
+
+		void highlight();
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	const tokenStyle = (token: Token): string | undefined => {
+		const styles = [`color: ${token.color ?? 'currentColor'}`];
+
+		if (token.fontStyle === 1 || token.fontStyle === 3) styles.push('font-style: italic');
+		if (token.fontStyle === 2 || token.fontStyle === 3) styles.push('font-weight: 700');
+
+		return styles.join('; ');
+	};
 </script>
 
-<div class="w-full overflow-hidden rounded-xl border border-border bg-card font-mono text-sm">
-	<div
-		class="border-b border-border px-4 py-2.5 text-[0.7rem] uppercase tracking-widest text-muted-foreground/60"
-	>
-		{state.language}
-	</div>
-
+<div class="w-full overflow-hidden rounded-xl font-mono text-md">
 	<div class="min-h-12 py-4">
-		{#each state.lines as line, i (`${i}_${line.content}`)}
+		{#each scene.lines as line, i (line.id ?? `${i}:${line.content}`)}
 			<div
 				class={cn(
-					'flex gap-5 rounded-sm px-5 py-0.5 transition-colors duration-200 ease-out',
-					line.highlighted && 'bg-primary/12',
+					'flex gap-5 rounded-sm px-5 py-0.5 transition-colors duration-150 ease-out motion-safe:will-change-transform',
+					line.highlighted && 'bg-primary/10',
 					line.dimmed && 'opacity-30'
 				)}
-				in:fly={{ x: -10, duration: 220, delay: i * 30, easing: cubicOut }}
+				in:fly={{ y: 4, duration: 700, delay: Math.min(i * 140, 900), easing: quintOut }}
 			>
-				<span class="min-w-[1.5ch] shrink-0 select-none text-right text-muted-foreground/40">
+				<span class="min-w-[1.5ch] shrink-0 select-none text-right text-muted-foreground/35">
 					{i + 1}
 				</span>
-				<span class="whitespace-pre text-foreground/85">{line.content || ' '}</span>
+				<span class="whitespace-pre">
+					{#if highlightedLanguage === scene.language && tokens[i]}
+						{#each tokens[i] as token, tokenIndex (`${tokenIndex}:${token.content}`)}
+							<span style={tokenStyle(token)}>{token.content}</span>
+						{/each}
+					{:else}
+						{line.content || ' '}
+					{/if}
+				</span>
 			</div>
 		{/each}
 	</div>
