@@ -10,7 +10,7 @@
 
 <div class="relative flex h-full items-center justify-center pl-6 pr-10 py-12">
 	{#key player.sceneIdx}
-		<div class="w-full" in:fade={{ duration: 260, easing: cubicOut }}>
+		<div class="w-full" in:fade={{ duration: 1500, easing: cubicOut }}>
 			<Scene state={player.phase.state} />
 		</div>
 	{/key}

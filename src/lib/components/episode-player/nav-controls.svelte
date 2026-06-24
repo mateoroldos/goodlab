@@ -1,37 +1,51 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { onDestroy } from 'svelte';
 	import { playerContext } from '$lib/player.svelte.js';
+	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
+	import { episodeNavigationContext } from './episode-navigation.svelte.js';
 
 	const player = playerContext.get();
+	const navigation = episodeNavigationContext.get();
+	const shortcuts = shortcutContext.get();
+	const progress = $derived(player.episodeProgress);
 
-	const dots = $derived(Array.from({ length: player.phaseCount }, (_, i) => i <= player.phaseIdx));
+	onDestroy(
+		shortcuts.register([
+			{
+				key: 'j',
+				description: 'Next step',
+				when: () => player.canGoNext,
+				run: navigation.next
+			},
+			{
+				key: 'k',
+				description: 'Previous step',
+				when: () => player.canGoPrev,
+				run: navigation.prev
+			}
+		])
+	);
 </script>
 
-<svelte:window
-	onkeydown={(e) => {
-		if (e.key === 'ArrowRight' && player.canGoNext) player.next();
-		if (e.key === 'ArrowLeft' && player.canGoPrev) player.prev();
-	}}
-/>
-
-<div class="flex items-center justify-center gap-6 border-t border-border px-10 py-5">
-	<Button variant="ghost" onclick={() => player.prev()} disabled={!player.canGoPrev}>← Back</Button>
-
-	<div
-		class="flex items-center gap-1.5"
-		aria-label="Phase {player.phaseIdx + 1} of {player.phaseCount}"
-	>
-		{#each dots as filled, i (i)}
-			<span
-				class="h-1.5 w-1.5 rounded-full transition-colors duration-200 ease-out"
-				class:bg-primary={filled}
-				class:bg-muted-foreground={!filled}
-				style="opacity: {filled ? 1 : 0.3}"
-			></span>
-		{/each}
+<footer
+	class="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center border-t border-primary/30 bg-background/95 px-3 py-2 font-mono text-xs shadow-[0_-1px_0_hsl(var(--primary)/0.12)]"
+>
+	<div class="flex items-center gap-2 text-primary">
+		<span class="bg-primary px-2 py-1 font-semibold text-primary-foreground">NORMAL</span>
+		<span class="hidden text-muted-foreground sm:inline">goodlab://episode</span>
 	</div>
 
-	<Button variant="default" onclick={() => player.next()} disabled={!player.canGoNext}>
-		{player.canGoNext ? 'Next →' : 'Done'}
-	</Button>
-</div>
+	<div class="justify-self-center text-muted-foreground">k/j</div>
+
+	<div
+		class="flex items-center justify-end gap-3 text-muted-foreground"
+		role="progressbar"
+		aria-label="Episode progress"
+		aria-valuemin="1"
+		aria-valuemax={progress.count}
+		aria-valuenow={progress.index + 1}
+	>
+		<span>{progress.index + 1}/{progress.count}</span>
+		<span class="text-primary">{Math.round(progress.percent)}%</span>
+	</div>
+</footer>
