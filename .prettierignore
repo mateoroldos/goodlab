@@ -1,0 +1,8 @@
+.svelte-kit
+build
+dist
+.vercel
+.netlify
+.wrangler
+node_modules
+bun.lock
