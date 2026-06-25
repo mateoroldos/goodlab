@@ -12,7 +12,7 @@
 	<Button
 		variant="outline"
 		size="icon-lg"
-		class="size-10 border-primary/40 bg-background/90 font-mono text-base text-primary shadow-[2px_2px_0_hsl(var(--primary)/0.35)] backdrop-blur hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground hover:shadow-[3px_3px_0_hsl(var(--primary)/0.25)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_hsl(var(--primary)/0.35)] disabled:shadow-none"
+		class="size-10 border-primary/40 bg-background/90 font-mono text-base text-primary backdrop-blur hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
 		disabled={!player.canGoPrev}
 		onclick={navigation.prev}
 		aria-label="Previous step"
@@ -23,7 +23,7 @@
 	<Button
 		variant="outline"
 		size="icon-lg"
-		class="size-10 border-primary/40 bg-background/90 font-mono text-base text-primary shadow-[2px_2px_0_hsl(var(--primary)/0.35)] backdrop-blur hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground hover:shadow-[3px_3px_0_hsl(var(--primary)/0.25)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_hsl(var(--primary)/0.35)] disabled:shadow-none"
+		class="size-10 border-primary/40 bg-background/90 font-mono text-base text-primary backdrop-blur hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
 		disabled={!player.canGoNext}
 		onclick={navigation.next}
 		aria-label="Next step"

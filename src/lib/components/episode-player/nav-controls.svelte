@@ -28,17 +28,17 @@
 </script>
 
 <footer
-	class="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center border-t border-primary/30 bg-background/95 px-3 py-2 font-mono text-xs shadow-[0_-1px_0_hsl(var(--primary)/0.12)]"
+	class="flex shrink-0 items-center border-t border-primary/30 bg-background/95 px-3 py-2 font-mono text-xs"
 >
-	<div class="flex items-center gap-2 text-primary">
+	<div class="flex flex-1 items-center gap-2 text-primary">
 		<span class="bg-primary px-2 py-1 font-semibold text-primary-foreground">NORMAL</span>
 		<span class="hidden text-muted-foreground sm:inline">goodlab://episode</span>
 	</div>
 
-	<div class="justify-self-center text-muted-foreground">k/j</div>
+	<div class="text-muted-foreground">k/j</div>
 
 	<div
-		class="flex items-center justify-end gap-3 text-muted-foreground"
+		class="flex flex-1 items-center justify-end gap-3 text-muted-foreground"
 		role="progressbar"
 		aria-label="Episode progress"
 		aria-valuemin="1"

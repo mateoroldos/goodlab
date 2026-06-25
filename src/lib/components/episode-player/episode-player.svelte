@@ -33,6 +33,7 @@
 		</span>
 	</header>
 
+	<!-- eslint-disable-next-line better-tailwindcss/no-restricted-classes -- Tailwind has no standard utility for a 2fr / 1px / 3fr grid layout. -->
 	<main class="grid flex-1 grid-cols-[2fr_1px_3fr] overflow-hidden">
 		<aside class="overflow-hidden">
 			<ScrollArea class="h-full">

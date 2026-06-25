@@ -114,6 +114,7 @@
 				)}
 				in:fly={{ y: 4, duration: 700, delay: Math.min(i * 140, 900), easing: quintOut }}
 			>
+				<!-- eslint-disable-next-line better-tailwindcss/no-restricted-classes -- 1.5ch matches the monospace digit width for line numbers. -->
 				<span class="min-w-[1.5ch] shrink-0 select-none text-right text-muted-foreground/35">
 					{i + 1}
 				</span>

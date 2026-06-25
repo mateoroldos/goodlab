@@ -12,6 +12,7 @@
 	});
 </script>
 
+<!-- eslint-disable-next-line better-tailwindcss/no-restricted-classes -- Viewport-relative vertical padding centers content across screen heights. -->
 <div class="flex min-h-full flex-col gap-10 px-12 py-[42dvh]">
 	{#each player.scenes as scene, sceneIdx (scene.id)}
 		<section class="flex flex-col gap-5">
@@ -19,7 +20,7 @@
 				{#if scene.title}
 					<span
 						class={[
-							'text-[0.7rem] font-medium uppercase tracking-widest transition-colors duration-300 ease-out',
+							'text-xs font-medium uppercase tracking-widest transition-colors duration-300 ease-out',
 							sceneIdx === player.sceneIdx ? 'text-primary' : 'text-muted-foreground/35'
 						]}
 					>
@@ -34,13 +35,13 @@
 					{#if active}
 						<p
 							bind:this={activeStep}
-							class="m-0 max-w-[38ch] text-[1.2rem] leading-relaxed text-foreground opacity-100 transition-all duration-300 ease-out"
+							class="m-0 max-w-md text-xl leading-relaxed text-foreground opacity-100 transition-all duration-300 ease-out"
 						>
 							{step.text}
 						</p>
 					{:else}
 						<p
-							class="m-0 max-w-[38ch] text-[1.2rem] leading-relaxed text-muted-foreground/45 opacity-70 transition-all duration-300 ease-out"
+							class="m-0 max-w-md text-xl leading-relaxed text-muted-foreground/45 opacity-70 transition-all duration-300 ease-out"
 						>
 							{step.text}
 						</p>
