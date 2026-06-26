@@ -16,7 +16,7 @@
 			data.series.episodes.slice(0, 9).map((episode, i) => ({
 				key: String(i + 1),
 				description: episode.title,
-				run: () => void goto(resolve(`/episodes/${episode.slug}`))
+				run: () => void goto(resolve(`/series/${data.series.slug}/e/${episode.slug}`))
 			}))
 		)
 	);
@@ -41,7 +41,7 @@
 				{#each data.series.episodes as episode, i (episode.slug)}
 					<li>
 						<a
-							href={resolve(`/episodes/${episode.slug}`)}
+							href={resolve(`/series/${data.series.slug}/e/${episode.slug}`)}
 							class="group flex items-start gap-5 border-b border-border py-5 text-foreground no-underline transition-colors duration-150 hover:bg-muted/30"
 						>
 							<span

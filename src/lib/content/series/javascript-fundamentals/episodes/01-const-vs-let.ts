@@ -123,6 +123,6 @@ const letChapter = defineChapter<CodeBlockState>({
 export const episode: Episode = {
 	chapters: [constChapter, letChapter],
 	description: "The difference between JavaScript's two variable declarations.",
-	slug: '01-test',
+	slug: '01-const-vs-let',
 	title: 'const vs let'
 };

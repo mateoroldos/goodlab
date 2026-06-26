@@ -1,4 +1,5 @@
 import type { Episode } from '$lib/episode.js';
+import { series as jsFundamentals } from './series/javascript-fundamentals/series.js';
 
 export interface EpisodeSummary {
 	slug: string;
@@ -16,62 +17,37 @@ export interface Series extends SeriesSummary {
 	episodes: EpisodeSummary[];
 }
 
-type EpisodeModule = {
-	episode: Episode;
-};
+interface SeriesDef extends Series {
+	loadEpisode: (slug: string) => Promise<Episode | undefined>;
+}
 
-const episodeLoaders: Record<string, () => Promise<EpisodeModule>> = {
-	'01-test': () => import('$lib/episodes/01-test/episode.js'),
-	'02-functions': () => import('$lib/episodes/02-functions/episode.js')
-};
+const allSeries: SeriesDef[] = [jsFundamentals];
 
-export const series: Series[] = [
-	{
-		description: 'Small JavaScript fundamentals explained through visual code states.',
-		episodes: [
-			{
-				description: "JavaScript's two variable declarations.",
-				slug: '01-test',
-				title: 'const vs let'
-			},
-			{
-				description: 'How functions package reusable behavior.',
-				slug: '02-functions',
-				title: 'functions'
-			}
-		],
-		slug: 'javascript-fundamentals',
-		title: 'JavaScript Fundamentals'
-	}
-];
-
-export const episodes = series.flatMap((item) => item.episodes);
-
-export const loadEpisode = async (slug: string): Promise<Episode | undefined> => {
-	const load = episodeLoaders[slug];
-	if (!load) return undefined;
-
-	const mod = await load();
-	return mod.episode;
-};
+export const series: Series[] = allSeries;
 
 export const findSeries = (slug: string): Series | undefined =>
-	series.find((item) => item.slug === slug);
+	allSeries.find((s) => s.slug === slug);
 
-export const findEpisodeSeries = (slug: string): Series | undefined =>
-	series.find((item) => item.episodes.some((episode) => episode.slug === slug));
+export const loadEpisode = async (
+	seriesSlug: string,
+	episodeSlug: string
+): Promise<Episode | undefined> => {
+	const s = allSeries.find((s) => s.slug === seriesSlug);
+	return s?.loadEpisode(episodeSlug);
+};
 
 export const findEpisodeNeighbors = (
-	slug: string
+	seriesSlug: string,
+	episodeSlug: string
 ): { previousEpisode?: EpisodeSummary; nextEpisode?: EpisodeSummary } => {
-	const owner = findEpisodeSeries(slug);
-	if (!owner) return {};
+	const s = allSeries.find((s) => s.slug === seriesSlug);
+	if (!s) return {};
 
-	const index = owner.episodes.findIndex((episode) => episode.slug === slug);
-	if (index === -1) return {};
+	const idx = s.episodes.findIndex((e) => e.slug === episodeSlug);
+	if (idx === -1) return {};
 
 	return {
-		previousEpisode: owner.episodes[index - 1],
-		nextEpisode: owner.episodes[index + 1]
+		previousEpisode: s.episodes[idx - 1],
+		nextEpisode: s.episodes[idx + 1]
 	};
 };

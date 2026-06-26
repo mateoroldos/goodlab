@@ -47,7 +47,7 @@
 			key: String(idx + 1),
 			description: `Episode ${idx + 1}`,
 			when: () => episodeMenuOpen,
-			run: () => void goto(resolve(`/episodes/${item.slug}`))
+			run: () => void goto(resolve(`/series/${series?.slug}/e/${item.slug}`))
 		})) ?? []
 	);
 
@@ -85,7 +85,7 @@
 				description: 'Next episode',
 				when: () => isComplete && Boolean(nextEpisode),
 				run: () => {
-					if (nextEpisode) void goto(resolve(`/episodes/${nextEpisode.slug}`));
+					if (nextEpisode) void goto(resolve(`/series/${series?.slug}/e/${nextEpisode.slug}`));
 				}
 			},
 			...episodeShortcuts
@@ -124,7 +124,7 @@
 												: undefined}
 										>
 											<a
-												href={resolve(`/episodes/${item.slug}`)}
+												href={resolve(`/series/${series?.slug}/e/${item.slug}`)}
 												class="flex w-full items-center justify-between gap-6"
 											>
 												<span>{item.title}</span>

@@ -79,7 +79,11 @@
 				</p>
 
 				<div class="flex flex-wrap items-center gap-2">
-					<Button href={resolve(`/episodes/${nextEpisode.slug}`)} variant="outline" size="sm">
+					<Button
+						href={resolve(`/series/${series?.slug}/e/${nextEpisode.slug}`)}
+						variant="outline"
+						size="sm"
+					>
 						Next episode
 						<Kbd><ArrowBendDownLeftIcon size={12} weight="bold" /></Kbd>
 					</Button>
