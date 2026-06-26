@@ -118,6 +118,41 @@
 	--radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Smooth disc movement via CSS View Transitions */
+::view-transition-group(music-disc) {
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	animation-duration: 420ms;
+}
+
+/* Subtle page fade + lift via View Transitions */
+@keyframes vt-page-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-page-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+::view-transition-old(root) {
+	animation: 130ms cubic-bezier(0.4, 0, 1, 1) both vt-page-out;
+}
+
+::view-transition-new(root) {
+	animation: 260ms cubic-bezier(0.215, 0.61, 0.355, 1) both vt-page-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
+	}
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

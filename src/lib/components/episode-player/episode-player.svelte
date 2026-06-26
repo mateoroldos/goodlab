@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { CaretDownIcon, HouseIcon } from 'phosphor-svelte';
+	import { CaretDownIcon } from 'phosphor-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { Player, playerContext } from '$lib/player.svelte.js';
@@ -8,7 +8,7 @@
 	import type { EpisodeSummary, Series } from '$lib/content/catalog.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
@@ -96,20 +96,6 @@
 <div class="flex h-dvh flex-col bg-background text-foreground">
 	<header class="flex shrink-0 items-center border-b border-border px-6 py-3">
 		<div class="flex min-w-0 items-center gap-3">
-			{#if series}
-				<Button href={resolve('/')} variant="ghost" size="icon-sm" aria-label="Home">
-					<HouseIcon weight="bold" size={16} />
-				</Button>
-			{:else}
-				<a
-					href={resolve('/')}
-					class="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-					aria-label="Back to library"
-				>
-					<HouseIcon weight="bold" size={16} />
-				</a>
-			{/if}
-
 			<Breadcrumb.Root>
 				<Breadcrumb.List>
 					{#if series}
@@ -129,7 +115,7 @@
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content
 									align="start"
-									class="min-w-56 rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
+									class="min-w-56 border border-border bg-popover text-popover-foreground shadow-lg"
 								>
 									{#each series.episodes as item, idx (item.slug)}
 										<DropdownMenu.Item
