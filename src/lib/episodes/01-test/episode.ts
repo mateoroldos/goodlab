@@ -1,7 +1,7 @@
-import { defineScene, type Episode } from '$lib/episode.js';
-import CodeBlock, { type CodeBlockState } from '$lib/scenes/code-block/code-block.svelte';
+import { defineChapter, type Episode } from '$lib/episode.js';
+import CodeBlock, { type CodeBlockState } from '$lib/visuals/code-block/code-block.svelte';
 
-const constScene = defineScene<CodeBlockState>({
+const constChapter = defineChapter<CodeBlockState>({
 	component: CodeBlock,
 	id: 'const',
 	steps: [
@@ -56,7 +56,7 @@ const constScene = defineScene<CodeBlockState>({
 	title: 'const'
 });
 
-const letScene = defineScene<CodeBlockState>({
+const letChapter = defineChapter<CodeBlockState>({
 	component: CodeBlock,
 	id: 'let',
 	steps: [
@@ -121,8 +121,8 @@ const letScene = defineScene<CodeBlockState>({
 });
 
 export const episode: Episode = {
+	chapters: [constChapter, letChapter],
 	description: "The difference between JavaScript's two variable declarations.",
-	scenes: [constScene, letScene],
 	slug: '01-test',
 	title: 'const vs let'
 };

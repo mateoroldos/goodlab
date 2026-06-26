@@ -63,16 +63,16 @@
 		state: CodeBlockState;
 	}
 
-	// eslint-disable-next-line svelte/no-unused-props -- false positive: `language` and `lines` are used via the `scene` alias. Tracked in eslint-plugin-svelte#1142 / #1172.
-	const { state: scene }: Props = $props();
+	// eslint-disable-next-line svelte/no-unused-props -- false positive: `language` and `lines` are used through the `codeState` alias. Tracked in eslint-plugin-svelte#1142 / #1172.
+	const { state: codeState }: Props = $props();
 
 	let tokens = $state.raw<TokenLine[]>([]);
 	let highlightedLanguage = $state<SupportedLanguage | undefined>();
 
-	const code = $derived(scene.lines.map((line) => line.content).join('\n'));
+	const code = $derived(codeState.lines.map((line) => line.content).join('\n'));
 
 	$effect(() => {
-		const language = scene.language;
+		const language = codeState.language;
 		const source = code;
 		let cancelled = false;
 
@@ -105,7 +105,7 @@
 
 <div class="w-full overflow-hidden rounded-xl font-mono text-md">
 	<div class="min-h-12 py-4">
-		{#each scene.lines as line, i (line.id ?? `${i}:${line.content}`)}
+		{#each codeState.lines as line, i (line.id ?? `${i}:${line.content}`)}
 			<div
 				class={cn(
 					'flex gap-5 rounded-sm px-5 py-0.5 transition-colors duration-150 ease-out motion-safe:will-change-transform',
@@ -119,7 +119,7 @@
 					{i + 1}
 				</span>
 				<span class="whitespace-pre">
-					{#if highlightedLanguage === scene.language && tokens[i]}
+					{#if highlightedLanguage === codeState.language && tokens[i]}
 						{#each tokens[i] as token, tokenIndex (`${tokenIndex}:${token.content}`)}
 							<span style={tokenStyle(token)}>{token.content}</span>
 						{/each}

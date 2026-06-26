@@ -9,7 +9,7 @@ export interface Step<S> {
 	phases: Array<Phase<S>>;
 }
 
-export interface SceneConfig<S = any> {
+export interface ChapterConfig<S = any> {
 	id: string;
 	title?: string;
 	component: Component<{ state: S }>;
@@ -20,7 +20,7 @@ export interface Episode {
 	slug: string;
 	title: string;
 	description: string;
-	scenes: SceneConfig[];
+	chapters: ChapterConfig[];
 }
 
-export const defineScene = <S>(config: SceneConfig<S>): SceneConfig<S> => config;
+export const defineChapter = <S>(config: ChapterConfig<S>): ChapterConfig<S> => config;

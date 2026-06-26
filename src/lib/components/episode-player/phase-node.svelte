@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { State } from './scene-nav-buttons.svelte';
+	import type { State } from './progress-rail.svelte';
 
 	interface Props {
 		id: string;

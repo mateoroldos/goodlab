@@ -8,8 +8,8 @@
 	};
 
 	// Single source of truth for phase IDs — used when building items and when querying the DOM.
-	export function phaseId(si: number, ti: number, pi: number): string {
-		return `${si}-${ti}-${pi}`;
+	export function phaseId(ci: number, ti: number, pi: number): string {
+		return `${ci}-${ti}-${pi}`;
 	}
 </script>
 
@@ -25,23 +25,23 @@
 
 	// done-sibling  = phase before current within the active step (already visited)
 	// upcoming-sibling = phase after current within the active step (not yet reached)
-	function resolveState(si: number, ti: number, pi: number): State {
-		const isCurrentStep = si === player.sceneIdx && ti === player.stepIdx;
+	function resolveState(ci: number, ti: number, pi: number): State {
+		const isCurrentStep = ci === player.chapterIdx && ti === player.stepIdx;
 		if (isCurrentStep) {
 			if (pi < player.phaseIdx) return 'done-sibling';
 			if (pi === player.phaseIdx) return 'current';
 			return 'upcoming-sibling';
 		}
-		const isDone = si < player.sceneIdx || (si === player.sceneIdx && ti < player.stepIdx);
+		const isDone = ci < player.chapterIdx || (ci === player.chapterIdx && ti < player.stepIdx);
 		return isDone ? 'done' : 'upcoming';
 	}
 
 	const items = $derived.by((): Item[] =>
-		player.scenes.flatMap((scene, si) =>
-			scene.steps.flatMap((step, ti) =>
+		player.chapters.flatMap((chapter, ci) =>
+			chapter.steps.flatMap((step, ti) =>
 				step.phases.map((_, pi) => ({
-					id: phaseId(si, ti, pi),
-					state: resolveState(si, ti, pi),
+					id: phaseId(ci, ti, pi),
+					state: resolveState(ci, ti, pi),
 					connectedToNext: pi < step.phases.length - 1
 				}))
 			)
@@ -54,7 +54,7 @@
 	// active circle, and scrolls to it. Works for both forward and backward navigation.
 	// py-[50dvh] on the inner list gives runway so any item can reach the viewport center.
 	$effect(() => {
-		const id = phaseId(player.sceneIdx, player.stepIdx, player.phaseIdx);
+		const id = phaseId(player.chapterIdx, player.stepIdx, player.phaseIdx);
 		const el = trackContainer?.querySelector(`[data-phase-id="${id}"]`);
 		el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
 	});

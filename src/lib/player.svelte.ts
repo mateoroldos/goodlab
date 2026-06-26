@@ -1,10 +1,10 @@
 import { Context } from 'runed';
-import type { Episode, SceneConfig, Step, Phase } from './episode.js';
+import type { Episode, ChapterConfig, Step, Phase } from './episode.js';
 
 export class Player {
 	readonly #getEpisode: () => Episode;
 
-	sceneIdx = $state(0);
+	chapterIdx = $state(0);
 	stepIdx = $state(0);
 	phaseIdx = $state(0);
 
@@ -16,46 +16,47 @@ export class Player {
 		return this.#getEpisode();
 	}
 
-	get scene(): SceneConfig {
-		return this.#episode.scenes[this.sceneIdx];
+	get chapter(): ChapterConfig {
+		return this.#episode.chapters[this.chapterIdx];
 	}
-	get scenes(): SceneConfig[] {
-		return this.#episode.scenes;
+	get chapters(): ChapterConfig[] {
+		return this.#episode.chapters;
 	}
 	get step(): Step<any> {
-		return this.scene.steps[this.stepIdx];
+		return this.chapter.steps[this.stepIdx];
 	}
 	get phase(): Phase<any> {
 		return this.step.phases[this.phaseIdx];
 	}
 
-	get sceneCount(): number {
-		return this.#episode.scenes.length;
+	get chapterCount(): number {
+		return this.#episode.chapters.length;
 	}
 	get stepCount(): number {
-		return this.scene.steps.length;
+		return this.chapter.steps.length;
 	}
 	get phaseCount(): number {
 		return this.step.phases.length;
 	}
 	get episodePhaseCount(): number {
-		return this.#episode.scenes.reduce(
-			(count, scene) => count + scene.steps.reduce((sum, step) => sum + step.phases.length, 0),
+		return this.#episode.chapters.reduce(
+			(count, chapter) => count + chapter.steps.reduce((sum, step) => sum + step.phases.length, 0),
 			0
 		);
 	}
 	get episodePhaseIdx(): number {
-		const completedScenes = this.#episode.scenes
-			.slice(0, this.sceneIdx)
+		const completedChapters = this.#episode.chapters
+			.slice(0, this.chapterIdx)
 			.reduce(
-				(count, scene) => count + scene.steps.reduce((sum, step) => sum + step.phases.length, 0),
+				(count, chapter) =>
+					count + chapter.steps.reduce((sum, step) => sum + step.phases.length, 0),
 				0
 			);
-		const completedSteps = this.scene.steps
+		const completedSteps = this.chapter.steps
 			.slice(0, this.stepIdx)
 			.reduce((count, step) => count + step.phases.length, 0);
 
-		return completedScenes + completedSteps + this.phaseIdx;
+		return completedChapters + completedSteps + this.phaseIdx;
 	}
 	get episodeProgress(): { index: number; count: number; percent: number } {
 		const count = this.episodePhaseCount;
@@ -68,25 +69,25 @@ export class Player {
 	get canGoNext(): boolean {
 		return (
 			this.phaseIdx < this.step.phases.length - 1 ||
-			this.stepIdx < this.scene.steps.length - 1 ||
-			this.sceneIdx < this.#episode.scenes.length - 1
+			this.stepIdx < this.chapter.steps.length - 1 ||
+			this.chapterIdx < this.#episode.chapters.length - 1
 		);
 	}
 
 	get canGoPrev(): boolean {
-		return this.phaseIdx > 0 || this.stepIdx > 0 || this.sceneIdx > 0;
+		return this.phaseIdx > 0 || this.stepIdx > 0 || this.chapterIdx > 0;
 	}
 
 	next = () => {
 		if (this.phaseIdx < this.step.phases.length - 1) {
 			this.phaseIdx += 1;
-		} else if (this.stepIdx < this.scene.steps.length - 1) {
+		} else if (this.stepIdx < this.chapter.steps.length - 1) {
 			this.phaseIdx = 0;
 			this.stepIdx += 1;
-		} else if (this.sceneIdx < this.#episode.scenes.length - 1) {
+		} else if (this.chapterIdx < this.#episode.chapters.length - 1) {
 			this.phaseIdx = 0;
 			this.stepIdx = 0;
-			this.sceneIdx += 1;
+			this.chapterIdx += 1;
 		}
 	};
 
@@ -96,9 +97,9 @@ export class Player {
 		} else if (this.stepIdx > 0) {
 			this.stepIdx -= 1;
 			this.phaseIdx = this.step.phases.length - 1;
-		} else if (this.sceneIdx > 0) {
-			this.sceneIdx -= 1;
-			this.stepIdx = this.scene.steps.length - 1;
+		} else if (this.chapterIdx > 0) {
+			this.chapterIdx -= 1;
+			this.stepIdx = this.chapter.steps.length - 1;
 			this.phaseIdx = this.step.phases.length - 1;
 		}
 	};

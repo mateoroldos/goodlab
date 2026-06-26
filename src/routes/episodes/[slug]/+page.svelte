@@ -5,4 +5,6 @@
 	const { data }: { data: PageData } = $props();
 </script>
 
-<EpisodePlayer episode={data.episode} />
+{#key data.episode.slug}
+	<EpisodePlayer episode={data.episode} nextEpisode={data.nextEpisode} series={data.series} />
+{/key}
