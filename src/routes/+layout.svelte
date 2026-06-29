@@ -27,8 +27,12 @@
 <ThemeProvider>
 	<SoundEffects>
 		<Shortcuts>
-			{@render children()}
-			<SiteFooter />
+			<div class="grid h-dvh grid-rows-[1fr_2rem]">
+				<div class="min-h-0 overflow-y-auto">
+					{@render children()}
+				</div>
+				<SiteFooter />
+			</div>
 		</Shortcuts>
 	</SoundEffects>
 </ThemeProvider>

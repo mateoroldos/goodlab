@@ -2,28 +2,66 @@
 	import { page } from '$app/state';
 	import { themeContext, themes } from '$lib/themes/theme.svelte.js';
 	import YoutubeMusic from '$lib/components/youtube-music/youtube-music.svelte';
+	import { Kbd } from '$lib/components/ui/kbd/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
 	const theme = themeContext.get();
 </script>
 
-<footer class="fixed bottom-6 left-6 z-40 flex items-center gap-2">
-	<label for="theme-select" class="sr-only">Theme</label>
-	<select
-		id="theme-select"
-		class="h-10 rounded-full border border-border bg-card px-4 pr-8 font-mono text-xs text-foreground shadow-sm outline-none transition-colors hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-ring"
-		value={theme.id}
-		onchange={(e) => theme.select(e.currentTarget.value)}
-	>
-		{#each themes as option (option.id)}
-			<option value={option.id}>{option.label}</option>
-		{/each}
-	</select>
-</footer>
+<footer
+	class="flex h-full items-center border-t border-border font-mono text-xs text-muted-foreground"
+>
+	<!-- Left: theme selector -->
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger
+			class="flex h-full cursor-default items-center gap-2 px-3 outline-none transition-colors hover:text-foreground"
+		>
+			<span
+				class="size-1.5 shrink-0 rounded-full transition-colors duration-300"
+				style="background-color: {theme.current.color}"
+			></span>
+			{theme.current.label}
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content
+			side="top"
+			sideOffset={8}
+			align="start"
+			class="min-w-44 font-mono text-xs"
+		>
+			<DropdownMenu.RadioGroup value={theme.id} onValueChange={(v) => theme.select(v)}>
+				{#each themes as option (option.id)}
+					<DropdownMenu.RadioItem value={option.id}>
+						{#snippet children({ checked })}
+							<span
+								class="size-1.5 shrink-0 rounded-full transition-colors duration-150"
+								style="background-color: {option.color}"
+							></span>
+							<span class={checked ? 'text-foreground' : ''}>{option.label}</span>
+						{/snippet}
+					</DropdownMenu.RadioItem>
+				{/each}
+			</DropdownMenu.RadioGroup>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
 
-{#if page.url.pathname !== '/'}
-	<footer
-		class="fixed bottom-6 right-6 z-40 flex rounded-full border border-border bg-card p-1 shadow-sm"
-	>
-		<YoutubeMusic class="size-10" />
-	</footer>
-{/if}
+	<!-- Center: ambient hint -->
+	<div class="flex flex-1 items-center justify-center gap-1.5 text-muted-foreground/40">
+		<span>when lost, press</span>
+		<Kbd>H</Kbd>
+		<span>to go home</span>
+	</div>
+
+	<!-- Right: github + music -->
+	<div class="flex h-full items-center gap-3 px-3">
+		<a
+			href="https://github.com/mateoroldos/goodlab"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="transition-colors hover:text-foreground">github</a
+		>
+
+		{#if page.url.pathname !== '/'}
+			<YoutubeMusic class="size-5" />
+		{/if}
+	</div>
+</footer>

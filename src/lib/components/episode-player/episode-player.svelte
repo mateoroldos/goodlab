@@ -93,7 +93,7 @@
 	);
 </script>
 
-<div class="flex h-dvh flex-col bg-background text-foreground">
+<div class="flex h-full flex-col bg-background text-foreground">
 	<header class="flex shrink-0 items-center border-b border-border px-6 py-3">
 		<div class="flex min-w-0 items-center gap-3">
 			<Breadcrumb.Root>

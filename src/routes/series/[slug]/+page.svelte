@@ -4,7 +4,6 @@
 	import { resolve } from '$app/paths';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
-	import PageFooter from '$lib/components/page-footer.svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
@@ -22,7 +21,7 @@
 	);
 </script>
 
-<div class="flex min-h-dvh flex-col">
+<div class="flex min-h-full flex-col">
 	<main class="mx-auto w-full max-w-2xl flex-1 px-8 py-16">
 		<header class="mb-10 border-b border-border pb-10">
 			<h1 class="mb-3 text-3xl font-semibold tracking-tight">{data.series.title}</h1>
@@ -60,5 +59,4 @@
 			</ol>
 		</section>
 	</main>
-	<PageFooter />
 </div>

@@ -9,7 +9,6 @@
 	import { series } from '$lib/content/catalog.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
-	import PageFooter from '$lib/components/page-footer.svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
@@ -28,7 +27,7 @@
 	);
 </script>
 
-<div class="flex min-h-dvh flex-col">
+<div class="flex min-h-full flex-col">
 	<main class="mx-auto w-full max-w-2xl flex-1 px-8 py-16">
 		<SiteHeader ascii={data.ascii} {intro} />
 
@@ -105,5 +104,4 @@
 			</ul>
 		</section>
 	</main>
-	<PageFooter />
 </div>
