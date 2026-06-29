@@ -21,11 +21,20 @@
 	import json from '@shikijs/langs/json';
 	import svelte from '@shikijs/langs/svelte';
 	import typescript from '@shikijs/langs/typescript';
+	import catppuccinMocha from '@shikijs/themes/catppuccin-mocha';
+	import dracula from '@shikijs/themes/dracula';
+	import githubDarkDefault from '@shikijs/themes/github-dark-default';
+	import gruvboxDarkMedium from '@shikijs/themes/gruvbox-dark-medium';
+	import nord from '@shikijs/themes/nord';
+	import rosePine from '@shikijs/themes/rose-pine';
+	import solarizedLight from '@shikijs/themes/solarized-light';
+	import tokyoNight from '@shikijs/themes/tokyo-night';
 	import vesper from '@shikijs/themes/vesper';
 	import { quintOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import { createHighlighterCore } from 'shiki/core';
 	import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+	import { themeContext } from '$lib/themes/theme.svelte.js';
 	import { cn } from '$lib/utils.js';
 
 	const supportedLanguages = [
@@ -48,7 +57,17 @@
 	const highlighter = createHighlighterCore({
 		engine: createJavaScriptRegexEngine(),
 		langs: [javascript, typescript, svelte, html, css, json],
-		themes: [vesper]
+		themes: [
+			vesper,
+			gruvboxDarkMedium,
+			catppuccinMocha,
+			dracula,
+			githubDarkDefault,
+			nord,
+			rosePine,
+			tokyoNight,
+			solarizedLight
+		]
 	});
 
 	const normalizeLang = (language: SupportedLanguage): SupportedLanguage => {
@@ -65,15 +84,18 @@
 
 	// eslint-disable-next-line svelte/no-unused-props -- false positive: `language` and `lines` are used through the `codeState` alias. Tracked in eslint-plugin-svelte#1142 / #1172.
 	const { state: codeState }: Props = $props();
+	const theme = themeContext.get();
 
 	let tokens = $state.raw<TokenLine[]>([]);
 	let highlightedLanguage = $state<SupportedLanguage | undefined>();
+	let highlightedTheme = $state<string | undefined>();
 
 	const code = $derived(codeState.lines.map((line) => line.content).join('\n'));
 
 	$effect(() => {
 		const language = codeState.language;
 		const source = code;
+		const shikiTheme = theme.shikiTheme;
 		let cancelled = false;
 
 		const highlight = async () => {
@@ -82,8 +104,9 @@
 
 			if (cancelled) return;
 
-			tokens = shiki.codeToTokens(source || ' ', { lang, theme: 'vesper' }).tokens as TokenLine[];
+			tokens = shiki.codeToTokens(source || ' ', { lang, theme: shikiTheme }).tokens as TokenLine[];
 			highlightedLanguage = language;
+			highlightedTheme = shikiTheme;
 		};
 
 		void highlight();
@@ -119,7 +142,7 @@
 					{i + 1}
 				</span>
 				<span class="whitespace-pre">
-					{#if highlightedLanguage === codeState.language && tokens[i]}
+					{#if highlightedLanguage === codeState.language && highlightedTheme === theme.shikiTheme && tokens[i]}
 						{#each tokens[i] as token, tokenIndex (`${tokenIndex}:${token.content}`)}
 							<span style={tokenStyle(token)}>{token.content}</span>
 						{/each}
