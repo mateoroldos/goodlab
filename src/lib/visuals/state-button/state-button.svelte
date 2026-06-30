@@ -18,7 +18,6 @@
 		success?: Snippet;
 		error?: Snippet;
 		shakeOnError?: boolean;
-		withSounds?: boolean;
 	};
 
 	const {
@@ -28,22 +27,11 @@
 		success,
 		error,
 		shakeOnError = true,
-		withSounds = true,
 		class: className,
 		...restProps
 	}: Props = $props();
 
-	const optionalSounds = () => {
-		if (!withSounds) return undefined;
-
-		try {
-			return soundContext.get();
-		} catch {
-			return undefined;
-		}
-	};
-
-	const sounds = optionalSounds();
+	const sounds = soundContext.get();
 
 	let prevState: StateButtonState | undefined;
 	$effect(() => {
@@ -52,8 +40,8 @@
 
 		if (prev === undefined || prev === externalState) return;
 
-		if (externalState === 'success' && withSounds) sounds?.play('ui.success');
-		if (externalState === 'error' && withSounds) sounds?.play('ui.error');
+		if (externalState === 'success') sounds.play('ui.success');
+		if (externalState === 'error') sounds.play('ui.error');
 	});
 
 	const shakeOnErrorTransition: Attachment = (element) => {
