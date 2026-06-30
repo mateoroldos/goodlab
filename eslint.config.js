@@ -41,7 +41,7 @@ export default [
 		languageOptions: {
 			parserOptions: {
 				projectService: {
-					allowDefaultProject: ['*.js']
+					allowDefaultProject: ['*.js', 'drizzle.config.ts']
 				},
 				tsconfigRootDir: import.meta.dirname
 			}

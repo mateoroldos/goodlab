@@ -8,6 +8,34 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "goodlab-local",
+			"database_id": "goodlab-local",
+			"migrations_dir": "./drizzle"
+		}
+	],
+	"env": {
+		"production": {
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "goodlab-prod",
+					"database_id": "57eab400-deb4-4472-87aa-cd247a9e715b",
+					"migrations_dir": "./drizzle"
+				}
+			]
+		}
+	},
+	"secrets": {
+		"required": [
+			"BETTER_AUTH_SECRET",
+			"BETTER_AUTH_URL",
+			"GITHUB_CLIENT_ID",
+			"GITHUB_CLIENT_SECRET"
+		]
+	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {

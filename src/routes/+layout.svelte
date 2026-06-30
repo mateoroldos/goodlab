@@ -1,6 +1,11 @@
 <script lang="ts">
 	import './layout.css';
 	import { onNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { GithubLogoIcon } from 'phosphor-svelte';
+	import { authClient } from '$lib/auth-client';
+	import { Button } from '$lib/components/ui/button';
+	import UserMenu from '$lib/components/user-menu.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import SiteFooter from '$lib/components/site-footer.svelte';
 	import ThemeProvider from '$lib/themes/theme-provider.svelte';
@@ -8,7 +13,13 @@
 	import Shortcuts from '$lib/shortcuts/shortcuts.svelte';
 	import YouTubeMusicMount from '$lib/components/youtube-music/youtube-music-mount.svelte';
 
-	const { children } = $props();
+	const { children, data } = $props();
+
+	async function signInWithGitHub() {
+		await authClient.signIn.social({
+			provider: 'github'
+		});
+	}
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -29,6 +40,16 @@
 		<Shortcuts>
 			<div class="grid h-dvh grid-rows-[1fr_2rem]">
 				<div class="min-h-0 overflow-y-auto">
+					<nav class="fixed top-4 right-4 z-50 flex items-center gap-3 font-mono text-xs">
+						{#if data.user}
+							<UserMenu user={data.user} />
+						{:else}
+							<Button variant="outline" size="sm" onclick={signInWithGitHub}>
+								<GithubLogoIcon aria-hidden="true" />
+								Sign in
+							</Button>
+						{/if}
+					</nav>
 					{@render children()}
 				</div>
 				<SiteFooter />
