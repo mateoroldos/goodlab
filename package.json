@@ -7,12 +7,12 @@
     "dev": "vite dev",
     "build": "wrangler types --check && vite build",
     "preview": "bun run build && wrangler dev",
-    "lint": "prettier --check . && eslint .",
+    "lint": "prettier --check . && NODE_OPTIONS=--max-old-space-size=4096 eslint .",
     "format": "prettier --write .",
     "prepare": "svelte-kit sync || echo ''",
     "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "deploy": "bun run build && wrangler deploy",
+    "deploy": "bun run build && wrangler deploy --env production",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {

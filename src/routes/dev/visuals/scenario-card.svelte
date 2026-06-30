@@ -17,7 +17,7 @@
 			<h3 class="font-medium">{title}</h3>
 			{#each sounds as sound (sound)}
 				<span
-					class="rounded-full border border-border/30 bg-background/60 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+					class="rounded-full border border-border/30 bg-background/60 px-2 py-0.5 font-mono text-2xs text-muted-foreground"
 				>
 					{sound}
 				</span>

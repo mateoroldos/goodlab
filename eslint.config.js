@@ -36,12 +36,13 @@ export default [
 		}
 	},
 
-	// TypeScript project service
+	// TypeScript project service for files outside tsconfig.json.
 	{
+		files: ['*.js', '*.ts', 'scripts/*.ts'],
 		languageOptions: {
 			parserOptions: {
 				projectService: {
-					allowDefaultProject: ['*.js', 'drizzle.config.ts']
+					allowDefaultProject: ['*.js', 'drizzle.config.ts', 'scripts/*.ts']
 				},
 				tsconfigRootDir: import.meta.dirname
 			}
@@ -49,6 +50,14 @@ export default [
 	},
 
 	{
-		ignores: ['.svelte-kit/**', 'build/**', 'dist/**', '.vercel/**', '.netlify/**', '.wrangler/**']
+		ignores: [
+			'.svelte-kit/**',
+			'build/**',
+			'dist/**',
+			'.vercel/**',
+			'.netlify/**',
+			'.wrangler/**',
+			'static/narration/**'
+		]
 	}
 ];
