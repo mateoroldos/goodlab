@@ -53,7 +53,7 @@
 		if (override) return override;
 		if (blockedNodeSet.has(id)) return 'blocked';
 		if (snapshot.currentNode === id || activeNodeSet.has(id)) return 'active';
-		return 'default';
+		return snapshot.spotlight ? 'dim' : 'default';
 	}
 
 	function edgeTone(id: EdgeId): FlowTone {

@@ -18,6 +18,7 @@
 <script lang="ts">
 	import { quintOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
+	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import { themeContext } from '$lib/themes/theme.svelte.js';
 	import { cn } from '$lib/utils.js';
 	import {
@@ -35,20 +36,69 @@
 	type TokenLine = Token[];
 
 	const normalizeLang = (language: SupportedLanguage): SupportedLanguage => {
-		const lang = language.trim().toLowerCase();
-
-		return supportedLanguages.includes(lang as SupportedLanguage)
-			? (lang as SupportedLanguage)
-			: language;
+		const lang = language.trim().toLowerCase() as SupportedLanguage;
+		return supportedLanguages.includes(lang) ? lang : language;
 	};
 
 	interface Props {
 		state: CodeBlockState;
+		/**
+		 * Line IDs to highlight/dim, kept separate from `state.lines` so highlight-only
+		 * updates don't re-trigger the per-line entrance transition.
+		 */
+		highlightedIds?: ReadonlySet<string>;
+		dimmedIds?: ReadonlySet<string>;
+		/**
+		 * Spotlight: these lines get the highlight treatment and every other
+		 * line dims automatically — one focus point, no enumeration of the rest.
+		 */
+		focusIds?: ReadonlySet<string>;
+		/** Disable to make all lines enter together instead of staggered. */
+		stagger?: boolean;
+		class?: string;
 	}
 
 	// eslint-disable-next-line svelte/no-unused-props -- language and lines accessed via codeState alias
-	const { state: codeState }: Props = $props();
+	const {
+		state: codeState,
+		highlightedIds,
+		dimmedIds,
+		focusIds,
+		stagger = true,
+		class: className
+	}: Props = $props();
+
+	const spotlight = $derived(focusIds !== undefined && focusIds.size > 0);
+
+	// SAFETY: only called when spotlight is true, which requires focusIds to be defined and non-empty.
+	const inFocus = (line: CodeLine): boolean =>
+		spotlight && line.id !== undefined && focusIds!.has(line.id);
+
+	const isHighlighted = (line: CodeLine): boolean =>
+		!!line.highlighted || inFocus(line) || !!highlightedIds?.has(line.id ?? '');
+
+	const isDimmed = (line: CodeLine): boolean =>
+		!!line.dimmed || !!dimmedIds?.has(line.id ?? '') || (spotlight && !inFocus(line));
 	const theme = themeContext.get();
+
+	// Quiet writing sounds: lines appearing after mount get a soft keyboard tick,
+	// so progressive code reveals feel typed rather than pasted. One tick per
+	// batch (two for multi-line batches) keeps it a whisper. Optional context —
+	// code blocks render outside the episode player too.
+	const sounds = soundContext.getOr(undefined);
+
+	let prevLineIds: ReadonlySet<string> | undefined;
+	$effect(() => {
+		const ids = new Set(codeState.lines.map((line, i) => line.id ?? `${i}:${line.content}`));
+		const prev = prevLineIds;
+		prevLineIds = ids;
+		if (!prev || !sounds) return;
+
+		const added = [...ids].filter((id) => !prev.has(id)).length;
+		if (added === 0) return;
+		sounds.play('keyboard.type');
+		if (added > 1) setTimeout(() => sounds.play('keyboard.type'), 90);
+	});
 
 	let tokens = $state.raw<TokenLine[]>([]);
 	let highlightedLanguage = $state<SupportedLanguage | undefined>();
@@ -90,19 +140,27 @@
 	};
 </script>
 
-<div class="w-full overflow-hidden rounded-xl font-mono text-md">
+<div class={cn('w-full overflow-hidden rounded-xl font-mono text-md', className)}>
 	<div class="min-h-12 py-4">
 		{#each codeState.lines as line, i (line.id ?? `${i}:${line.content}`)}
 			<div
 				class={cn(
-					'flex gap-5 rounded-sm px-5 py-0.5 transition-colors duration-150 ease-out motion-safe:will-change-transform',
-					line.highlighted && 'bg-primary/10',
-					line.dimmed && 'opacity-30'
+					'flex gap-5 rounded-sm px-5 py-0.5 transition-colors duration-300 ease-out motion-safe:will-change-transform',
+					isHighlighted(line) && 'bg-primary/10',
+					isDimmed(line) && 'opacity-30'
 				)}
-				in:fly={{ y: 4, duration: 700, delay: Math.min(i * 140, 900), easing: quintOut }}
+				in:fly={{
+					y: 4,
+					duration: 700,
+					delay: stagger ? Math.min(i * 140, 900) : 0,
+					easing: quintOut
+				}}
 			>
-				<!-- eslint-disable-next-line better-tailwindcss/no-restricted-classes -- 1.5ch matches the monospace digit width for line numbers. -->
-				<span class="min-w-[1.5ch] shrink-0 select-none text-right text-muted-foreground/35">
+				<!-- eslint-disable better-tailwindcss/no-restricted-classes -- 1.5ch matches the monospace digit width for line numbers. -->
+				<span
+					class="flex min-w-[1.5ch] shrink-0 select-none items-center justify-end text-right text-muted-foreground/35"
+				>
+					<!-- eslint-enable better-tailwindcss/no-restricted-classes -->
 					{i + 1}
 				</span>
 				<span class="whitespace-pre">

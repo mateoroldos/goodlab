@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { cn } from '$lib/utils.js';
+	import { tv } from 'tailwind-variants';
 	import type { FlowTone } from './flow-types.js';
 
 	interface Props {
@@ -15,32 +15,42 @@
 
 	const { x, y, width = 88, height = 32, radius = 8, tone = 'default', children }: Props = $props();
 
-	const rectClass = $derived(
-		cn(
-			// eslint-disable-next-line better-tailwindcss/no-restricted-classes -- SVG node fills use color-mix and stroke-only transitions not expressible by Tailwind tokens.
-			'fill-[color-mix(in_oklab,var(--muted)_80%,transparent)] stroke-border stroke-1 transition-[fill,stroke,stroke-width] duration-[240ms] ease-in-out motion-reduce:transition-none',
-			// eslint-disable-next-line better-tailwindcss/no-restricted-classes -- SVG emphasis needs a 1.5px stroke between Tailwind stroke-1 and stroke-2.
-			tone === 'active' && 'fill-primary/15 stroke-primary stroke-[1.5]',
-			// eslint-disable-next-line better-tailwindcss/no-restricted-classes -- SVG emphasis needs a 1.5px stroke between Tailwind stroke-1 and stroke-2.
-			tone === 'success' && 'fill-green-500/10 stroke-green-500 stroke-[1.5]',
-			(tone === 'invalid' || tone === 'blocked') &&
-				// eslint-disable-next-line better-tailwindcss/no-restricted-classes -- SVG emphasis needs a 1.5px stroke between Tailwind stroke-1 and stroke-2.
-				'fill-destructive/10 stroke-destructive stroke-[1.5]'
-		)
-	);
-	const textClass = $derived(
-		cn(
-			// eslint-disable-next-line better-tailwindcss/no-restricted-classes -- SVG text only animates fill; Tailwind has no non-arbitrary fill-only transition utility.
-			'select-none fill-muted-foreground font-mono text-xs transition-[fill] duration-200 ease-out motion-reduce:transition-none',
-			(tone === 'active' || tone === 'success' || tone === 'invalid' || tone === 'blocked') &&
-				'fill-foreground'
-		)
-	);
+	/* eslint-disable better-tailwindcss/no-restricted-classes -- SVG nodes need color-mix fills, 1.5px strokes, and per-slot transitions not expressible with Tailwind tokens. */
+	const nodeVariants = tv({
+		slots: {
+			wrapper: 'transition-opacity duration-300 ease-out motion-reduce:transition-none',
+			rect: 'fill-[color-mix(in_oklab,var(--muted)_80%,transparent)] stroke-border stroke-1 transition-[fill,stroke,stroke-width] duration-[240ms] ease-in-out motion-reduce:transition-none',
+			text: 'select-none fill-muted-foreground font-mono text-xs transition-[fill] duration-200 ease-out motion-reduce:transition-none'
+		},
+		variants: {
+			tone: {
+				default: {},
+				dim: { wrapper: 'opacity-40' },
+				active: { rect: 'fill-primary/15 stroke-primary stroke-[1.5]', text: 'fill-foreground' },
+				success: {
+					rect: 'fill-green-500/10 stroke-green-500 stroke-[1.5]',
+					text: 'fill-foreground'
+				},
+				invalid: {
+					rect: 'fill-destructive/10 stroke-destructive stroke-[1.5]',
+					text: 'fill-foreground'
+				},
+				blocked: {
+					rect: 'fill-destructive/10 stroke-destructive stroke-[1.5]',
+					text: 'fill-foreground'
+				}
+			}
+		},
+		defaultVariants: { tone: 'default' }
+	});
+	/* eslint-enable better-tailwindcss/no-restricted-classes */
+
+	const { wrapper, rect, text } = $derived(nodeVariants({ tone }));
 </script>
 
-<g>
-	<rect x={x - width / 2} y={y - height / 2} {width} {height} rx={radius} class={rectClass} />
-	<text {x} {y} class={textClass} dominant-baseline="middle" text-anchor="middle">
+<g class={wrapper()}>
+	<rect x={x - width / 2} y={y - height / 2} {width} {height} rx={radius} class={rect()} />
+	<text {x} {y} class={text()} dominant-baseline="middle" text-anchor="middle">
 		{@render children?.()}
 	</text>
 </g>

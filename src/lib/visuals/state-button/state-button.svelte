@@ -1,7 +1,3 @@
-<script module lang="ts">
-	export type StateButtonState = 'idle' | 'pending' | 'success' | 'error';
-</script>
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -10,9 +6,10 @@
 	import { Button, type ButtonProps } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
+	import { type ActionState } from '$lib/visuals/action-state.js';
 
 	type Props = Omit<ButtonProps, 'children'> & {
-		state: StateButtonState;
+		state: ActionState;
 		children?: Snippet;
 		pending?: Snippet;
 		success?: Snippet;
@@ -33,7 +30,7 @@
 
 	const sounds = soundContext.get();
 
-	let prevState: StateButtonState | undefined;
+	let prevState: ActionState | undefined;
 	$effect(() => {
 		const prev = prevState;
 		prevState = externalState;
@@ -45,7 +42,7 @@
 	});
 
 	const shakeOnErrorTransition: Attachment = (element) => {
-		let prev: StateButtonState | undefined;
+		let prev: ActionState | undefined;
 		let animation: Animation | undefined;
 
 		$effect(() => {

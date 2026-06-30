@@ -61,6 +61,11 @@ export interface ExplainerGraphSnapshot<
 	visibleLabels?: ReadonlyArray<ExplainerGraphLabelRef<EdgeId>>;
 	nodeTones?: Partial<Record<NodeId, FlowTone>>;
 	edgeTones?: Partial<Record<EdgeId, FlowTone>>;
+	/**
+	 * Spotlight: nodes that aren't current/active/blocked (or explicitly toned)
+	 * dim, so the one node being discussed is the single focus point.
+	 */
+	spotlight?: boolean;
 }
 
 export interface ExplainerGraphMotion {

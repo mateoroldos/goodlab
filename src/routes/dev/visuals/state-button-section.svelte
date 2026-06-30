@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import StateButton, {
-		type StateButtonState
-	} from '$lib/visuals/state-button/state-button.svelte';
+	import StateButton from '$lib/visuals/state-button/state-button.svelte';
+	import { type ActionState } from '$lib/visuals/action-state.js';
 	import ComponentPreview from './component-preview.svelte';
 	import { codeExample } from './code-example.js';
 	import SectionHeading from './section-heading.svelte';
 
-	const states: StateButtonState[] = ['idle', 'pending', 'success', 'error'];
+	const states: ActionState[] = ['idle', 'pending', 'success', 'error'];
 	const code = codeExample(
 		'svelte',
 		`
@@ -20,7 +19,7 @@
 `
 	);
 
-	let selected = $state<StateButtonState>('idle');
+	let selected = $state<ActionState>('idle');
 </script>
 
 <section class="space-y-4">
