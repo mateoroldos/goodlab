@@ -3,13 +3,13 @@
 
 	const player = playerContext.get();
 
-	const Chapter = $derived(player.chapter.component);
+	const Scene = $derived(player.chapter.scene);
 </script>
 
 <div
 	class="relative bg-muted/15 flex h-full flex-col items-center justify-center gap-8 pl-6 pr-10 py-12"
 >
 	<div class="w-full">
-		<Chapter state={player.phase.state} />
+		<Scene state={player.state} />
 	</div>
 </div>

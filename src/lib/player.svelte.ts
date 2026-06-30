@@ -1,12 +1,28 @@
 import { Context } from 'runed';
-import type { Episode, ChapterConfig, Step, Phase } from './episode.js';
+import {
+	chapterStops,
+	stateAtEntry,
+	stateAtStop,
+	type ChapterConfig,
+	type Episode,
+	type Stop
+} from './episode.js';
+
+export type PlayerMode = 'read' | 'listen';
 
 export class Player {
 	readonly #getEpisode: () => Episode;
 
+	mode: PlayerMode = $state('read');
 	chapterIdx = $state(0);
-	stepIdx = $state(0);
-	phaseIdx = $state(0);
+	/** Current stop. `-1` means "before the chapter's first stop" (listen mode only). */
+	stopIdx = $state(0);
+	/**
+	 * Listen mode's fine-grained cursor into `chapterTimeline` — lets at-spans
+	 * fire mid-sentence at their word. `-1` means "before the first entry".
+	 * Owned by the narrator; ignored in read mode.
+	 */
+	cursor = $state(-1);
 
 	constructor(getEpisode: () => Episode) {
 		this.#getEpisode = getEpisode;
@@ -19,88 +35,63 @@ export class Player {
 	get chapter(): ChapterConfig {
 		return this.#episode.chapters[this.chapterIdx];
 	}
+
 	get chapters(): ChapterConfig[] {
 		return this.#episode.chapters;
 	}
-	get step(): Step<any> {
-		return this.chapter.steps[this.stepIdx];
-	}
-	get phase(): Phase<any> {
-		return this.step.phases[this.phaseIdx];
+
+	stops: Array<Stop<any>> = $derived(chapterStops(this.chapter));
+
+	get stop(): Stop<any> | undefined {
+		return this.stops[this.stopIdx];
 	}
 
-	get chapterCount(): number {
-		return this.#episode.chapters.length;
-	}
-	get stepCount(): number {
-		return this.chapter.steps.length;
-	}
-	get phaseCount(): number {
-		return this.step.phases.length;
-	}
-	get episodePhaseCount(): number {
-		return this.#episode.chapters.reduce(
-			(count, chapter) => count + chapter.steps.reduce((sum, step) => sum + step.phases.length, 0),
-			0
-		);
-	}
-	get episodePhaseIdx(): number {
-		const completedChapters = this.#episode.chapters
-			.slice(0, this.chapterIdx)
-			.reduce(
-				(count, chapter) =>
-					count + chapter.steps.reduce((sum, step) => sum + step.phases.length, 0),
-				0
-			);
-		const completedSteps = this.chapter.steps
-			.slice(0, this.stepIdx)
-			.reduce((count, step) => count + step.phases.length, 0);
+	/**
+	 * Current folded scene state. Read mode folds through the current stop and
+	 * the at-spans in its reach; listen mode follows the narrator's cursor so
+	 * at-spans land on their exact word.
+	 */
+	state: any = $derived(
+		this.mode === 'listen'
+			? stateAtEntry(this.chapter, this.cursor)
+			: stateAtStop(this.chapter, this.stopIdx)
+	);
 
-		return completedChapters + completedSteps + this.phaseIdx;
-	}
-	get episodeProgress(): { index: number; count: number; percent: number } {
-		const count = this.episodePhaseCount;
-		const index = this.episodePhaseIdx;
-		const percent = count <= 1 ? 100 : (index / (count - 1)) * 100;
-
-		return { index, count, percent };
+	get paragraphIdx(): number {
+		return this.stop?.paragraphIdx ?? 0;
 	}
 
 	get canGoNext(): boolean {
 		return (
-			this.phaseIdx < this.step.phases.length - 1 ||
-			this.stepIdx < this.chapter.steps.length - 1 ||
-			this.chapterIdx < this.#episode.chapters.length - 1
+			this.stopIdx < this.stops.length - 1 || this.chapterIdx < this.#episode.chapters.length - 1
 		);
 	}
 
 	get canGoPrev(): boolean {
-		return this.phaseIdx > 0 || this.stepIdx > 0 || this.chapterIdx > 0;
+		return this.stopIdx > 0 || this.chapterIdx > 0;
+	}
+
+	/** True on the episode's last stop — drives the end-of-episode UI. */
+	get isComplete(): boolean {
+		return !this.canGoNext;
 	}
 
 	next = () => {
-		if (this.phaseIdx < this.step.phases.length - 1) {
-			this.phaseIdx += 1;
-		} else if (this.stepIdx < this.chapter.steps.length - 1) {
-			this.phaseIdx = 0;
-			this.stepIdx += 1;
+		if (this.stopIdx < this.stops.length - 1) {
+			this.stopIdx += 1;
 		} else if (this.chapterIdx < this.#episode.chapters.length - 1) {
-			this.phaseIdx = 0;
-			this.stepIdx = 0;
 			this.chapterIdx += 1;
+			this.stopIdx = 0;
 		}
 	};
 
 	prev = () => {
-		if (this.phaseIdx > 0) {
-			this.phaseIdx -= 1;
-		} else if (this.stepIdx > 0) {
-			this.stepIdx -= 1;
-			this.phaseIdx = this.step.phases.length - 1;
+		if (this.stopIdx > 0) {
+			this.stopIdx -= 1;
 		} else if (this.chapterIdx > 0) {
 			this.chapterIdx -= 1;
-			this.stepIdx = this.chapter.steps.length - 1;
-			this.phaseIdx = this.step.phases.length - 1;
+			// stops re-derives from the new chapter — read it after the assignment.
+			this.stopIdx = this.stops.length - 1;
 		}
 	};
 }

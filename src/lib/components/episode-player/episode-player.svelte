@@ -13,7 +13,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
-	import StepText from './step-text.svelte';
+	import Narration from './narration.svelte';
 	import ChapterCanvas from './chapter-canvas.svelte';
 	import ProgressRail from './progress-rail.svelte';
 	import {
@@ -37,7 +37,6 @@
 	const navigation = createEpisodeNavigation(player, sounds);
 	episodeNavigationContext.set(navigation);
 
-	const isComplete = $derived(!player.canGoNext);
 	let episodeMenuOpen = $state(false);
 	const openEpisodeMenu = () => {
 		if (series) episodeMenuOpen = true;
@@ -53,37 +52,37 @@
 
 	onMount(() =>
 		shortcuts.register([
-			{ key: 'j', description: 'Next step', when: () => player.canGoNext, run: navigation.next },
+			{ key: 'j', description: 'Next stop', when: () => player.canGoNext, run: navigation.next },
 			{
 				key: 'k',
-				description: 'Previous step',
+				description: 'Previous stop',
 				when: () => player.canGoPrev,
 				run: navigation.prev
 			},
 			{
-				key: ' ',
+				key: 'e',
 				description: 'Open episode menu',
 				when: () => Boolean(series) && !episodeMenuOpen,
 				run: openEpisodeMenu
 			},
 			{
-				key: 'h',
-				description: 'Home',
-				when: () => isComplete && !nextEpisode,
-				run: () => void goto(resolve('/'))
-			},
-			{
 				key: 'Escape',
 				description: 'Back to series',
-				when: () => isComplete && !nextEpisode && Boolean(series),
+				when: () => player.isComplete && !nextEpisode && Boolean(series),
 				run: () => {
 					if (series) void goto(resolve(`/series/${series.slug}`));
 				}
 			},
 			{
+				key: 'h',
+				description: 'Home',
+				when: () => player.isComplete && !nextEpisode,
+				run: () => void goto(resolve('/'))
+			},
+			{
 				key: 'Enter',
 				description: 'Next episode',
-				when: () => isComplete && Boolean(nextEpisode),
+				when: () => player.isComplete && Boolean(nextEpisode),
 				run: () => {
 					if (nextEpisode) void goto(resolve(`/series/${series?.slug}/e/${nextEpisode.slug}`));
 				}
@@ -111,7 +110,7 @@
 								<DropdownMenu.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm' })}>
 									{episode.title}
 									<CaretDownIcon size={14} weight="bold" />
-									<Kbd>Space</Kbd>
+									<Kbd>E</Kbd>
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content
 									align="start"
@@ -142,12 +141,6 @@
 					{/if}
 				</Breadcrumb.List>
 			</Breadcrumb.Root>
-			<span class="sr-only flex-col leading-tight">
-				{#if series}
-					<span class="text-xs text-muted-foreground/60">{series.title}</span>
-				{/if}
-				<span class="text-sm font-medium">{episode.title}</span>
-			</span>
 		</div>
 	</header>
 
@@ -157,7 +150,7 @@
 			<ProgressRail />
 			<div class="min-h-0 flex-1">
 				<ScrollArea class="h-full">
-					<StepText {nextEpisode} {series} />
+					<Narration {nextEpisode} {series} />
 				</ScrollArea>
 			</div>
 		</aside>
