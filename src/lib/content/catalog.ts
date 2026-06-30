@@ -1,5 +1,4 @@
 import type { Episode } from '$lib/episode.js';
-import { series as jsFundamentals } from './series/javascript-fundamentals/series.js';
 
 export interface EpisodeSummary {
 	slug: string;
@@ -17,11 +16,40 @@ export interface Series extends SeriesSummary {
 	episodes: EpisodeSummary[];
 }
 
-interface SeriesDef extends Series {
-	loadEpisode: (slug: string) => Promise<Episode | undefined>;
+/** Shape each series.ts file must export. Slug is derived from the directory name. */
+export interface SeriesMeta {
+	title: string;
+	description: string;
 }
 
-const allSeries: SeriesDef[] = [jsFundamentals];
+const seriesModules = import.meta.glob<SeriesMeta>('./series/*/series.ts', {
+	import: 'series',
+	eager: true
+});
+
+const episodeModules = import.meta.glob<Episode>('./series/*/episodes/*/episode.ts', {
+	import: 'episode',
+	eager: true
+});
+
+// Glob order is non-deterministic — always sort keys.
+const sortedEpisodes = Object.entries(episodeModules).sort(([a], [b]) => a.localeCompare(b));
+
+const pathSlug = (path: string): string => {
+	const slug = path.split('/').at(-2);
+	if (!slug) throw new Error(`Unexpected glob path shape: ${path}`);
+	return slug;
+};
+
+const allSeries: Series[] = Object.entries(seriesModules)
+	.sort(([a], [b]) => a.localeCompare(b))
+	.map(([seriesPath, { title, description }]) => {
+		const slug = pathSlug(seriesPath);
+		const episodes = sortedEpisodes
+			.filter(([p]) => p.startsWith(`./series/${slug}/`))
+			.map(([p, ep]) => ({ slug: pathSlug(p), title: ep.title, description: ep.description }));
+		return { slug, title, description, episodes };
+	});
 
 export const series: Series[] = allSeries;
 
@@ -31,10 +59,8 @@ export const findSeries = (slug: string): Series | undefined =>
 export const loadEpisode = async (
 	seriesSlug: string,
 	episodeSlug: string
-): Promise<Episode | undefined> => {
-	const s = allSeries.find((s) => s.slug === seriesSlug);
-	return s?.loadEpisode(episodeSlug);
-};
+): Promise<Episode | undefined> =>
+	episodeModules[`./series/${seriesSlug}/episodes/${episodeSlug}/episode.ts`];
 
 export const findEpisodeNeighbors = (
 	seriesSlug: string,
