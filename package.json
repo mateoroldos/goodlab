@@ -13,7 +13,8 @@
     "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "deploy": "bun run build && wrangler deploy --env production",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "narration:generate": "bun scripts/generate-narration.ts"
   },
   "devDependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.2.8",
