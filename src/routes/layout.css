@@ -6,7 +6,6 @@
 @custom-variant dark (&:is(.dark *));
 @plugin '@tailwindcss/typography';
 
-
 :root[data-theme='vesper'] {
 	color-scheme: dark;
 	--background: #101010;
@@ -321,7 +320,6 @@
 	--sidebar-border: #d9d2c0;
 	--sidebar-ring: #268bd2;
 }
-
 
 @theme inline {
 	--font-sans: 'IBM Plex Sans Variable', sans-serif;
