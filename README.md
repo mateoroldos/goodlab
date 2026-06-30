@@ -1,33 +1,31 @@
-# sv
+# Goodlab
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A quiet lab exploring software craft, good code, and better ways to think.
 
-## Creating a project
+Goodlab is a SvelteKit project for research notes, experiments, and visual series about ideas behind software. It is meant to be read and built slowly.
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+## Run
 
 ```sh
-# recreate this project
-bun x sv@0.16.1 create --template minimal --types ts --add tailwindcss="plugins:typography" --install bun ./goodlab
+bun install
+bun run dev
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Commands
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun run check
+bun run lint
+bun run build
 ```
+
+## Project
+
+- `src/routes` contains the app pages
+- `src/lib/content` contains series and episodes
+- `src/lib/visuals` contains reusable visual primitives
+- `src/lib/components` contains shared interface components
+- `docs/research` contains research notes and source-backed briefs
 
 ## Environment Variables
 
@@ -83,15 +81,3 @@ bunx wrangler d1 migrations apply goodlab-prod --env production --remote
 ```
 
 The default configured D1 binding is `goodlab-local`, which is used with Wrangler's local D1 simulation. The production environment overrides the same `DB` binding to use the remote `goodlab-prod` database.
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
