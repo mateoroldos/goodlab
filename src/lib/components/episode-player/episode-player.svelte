@@ -6,6 +6,9 @@
 	import { Player, playerContext } from '$lib/player.svelte.js';
 	import type { Episode } from '$lib/episode.js';
 	import type { EpisodeSummary, Series } from '$lib/content/catalog.js';
+	import { hasNarration } from '$lib/narration/clips.js';
+	import { manifest } from '$lib/narration/manifest.js';
+	import { Narrator, narratorContext } from '$lib/narration/narrator.svelte.js';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
@@ -14,6 +17,7 @@
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import Narration from './narration.svelte';
+	import ListenPill from './listen-pill.svelte';
 	import ChapterCanvas from './chapter-canvas.svelte';
 	import ProgressRail from './progress-rail.svelte';
 	import {
@@ -29,17 +33,24 @@
 	const { episode, nextEpisode, series }: Props = $props();
 
 	const player = new Player(() => episode);
+	const narrator = new Narrator(player, manifest, () => ({
+		series: series?.slug,
+		episode: episode.slug
+	}));
 	const sounds = soundContext.get();
 	const shortcuts = shortcutContext.get();
 
 	playerContext.set(player);
+	narratorContext.set(narrator);
 
 	const navigation = createEpisodeNavigation(player, sounds);
 	episodeNavigationContext.set(navigation);
 
+	const narrationAvailable = $derived(hasNarration(manifest, series?.slug, episode.slug));
+
 	let episodeMenuOpen = $state(false);
 	const openEpisodeMenu = () => {
-		if (series) episodeMenuOpen = true;
+		if (series && !narrator.listening) episodeMenuOpen = true;
 	};
 	const episodeShortcuts = $derived(
 		series?.episodes.slice(0, 9).map((item, idx) => ({
@@ -50,46 +61,67 @@
 		})) ?? []
 	);
 
-	onMount(() =>
-		shortcuts.register([
-			{ key: 'j', description: 'Next stop', when: () => player.canGoNext, run: navigation.next },
+	onMount(() => {
+		const unregister = shortcuts.register([
+			{
+				key: 'j',
+				description: 'Next stop',
+				when: () => player.canGoNext && !narrator.listening,
+				run: () => navigation.next()
+			},
 			{
 				key: 'k',
 				description: 'Previous stop',
-				when: () => player.canGoPrev,
-				run: navigation.prev
+				when: () => player.canGoPrev && !narrator.listening,
+				run: () => navigation.prev()
 			},
 			{
 				key: 'e',
 				description: 'Open episode menu',
-				when: () => Boolean(series) && !episodeMenuOpen,
+				when: () => Boolean(series) && !episodeMenuOpen && !narrator.listening,
 				run: openEpisodeMenu
 			},
 			{
-				key: 'Escape',
-				description: 'Back to series',
-				when: () => player.isComplete && !nextEpisode && Boolean(series),
+				key: ' ',
+				description: 'Listen / pause',
+				// Matches the pill's visibility — no invisible listen mode on the completed screen.
+				when: () =>
+					narrationAvailable && !episodeMenuOpen && (narrator.listening || !player.isComplete),
 				run: () => {
-					if (series) void goto(resolve(`/series/${series.slug}`));
+					if (!narrator.listening) narrator.start();
+					else narrator.toggle();
+				}
+			},
+			{
+				key: 'Escape',
+				description: 'Exit listen / back to series',
+				when: () => narrator.listening || (player.isComplete && !nextEpisode && Boolean(series)),
+				run: () => {
+					if (narrator.listening) narrator.exit();
+					else if (series) void goto(resolve(`/series/${series.slug}`));
 				}
 			},
 			{
 				key: 'h',
 				description: 'Home',
-				when: () => player.isComplete && !nextEpisode,
+				when: () => player.isComplete && !nextEpisode && !narrator.listening,
 				run: () => void goto(resolve('/'))
 			},
 			{
 				key: 'Enter',
 				description: 'Next episode',
-				when: () => player.isComplete && Boolean(nextEpisode),
+				when: () => player.isComplete && Boolean(nextEpisode) && !narrator.listening,
 				run: () => {
 					if (nextEpisode) void goto(resolve(`/series/${series?.slug}/e/${nextEpisode.slug}`));
 				}
 			},
 			...episodeShortcuts
-		])
-	);
+		]);
+		return () => {
+			unregister();
+			narrator.destroy();
+		};
+	});
 </script>
 
 <div class="flex h-full flex-col bg-background text-foreground">
@@ -148,7 +180,8 @@
 	<main class="grid flex-1 grid-cols-[2fr_1px_3fr] overflow-hidden">
 		<aside class="flex overflow-hidden">
 			<ProgressRail />
-			<div class="min-h-0 flex-1">
+			<div class="relative min-h-0 flex-1">
+				<ListenPill {narrationAvailable} isComplete={player.isComplete} />
 				<ScrollArea class="h-full">
 					<Narration {nextEpisode} {series} />
 				</ScrollArea>
