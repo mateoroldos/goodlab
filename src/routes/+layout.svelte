@@ -1,7 +1,6 @@
 <script lang="ts">
 	import './layout.css';
 	import { onNavigate } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { GithubLogoIcon } from 'phosphor-svelte';
 	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button';
@@ -38,6 +37,7 @@
 <ThemeProvider>
 	<SoundEffects>
 		<Shortcuts>
+			<!-- eslint-disable-next-line better-tailwindcss/no-restricted-classes -- The footer is exactly 2rem tall; Tailwind has no named grid-row template for this. -->
 			<div class="grid h-dvh grid-rows-[1fr_2rem]">
 				<div class="min-h-0 overflow-y-auto">
 					<nav class="fixed top-4 right-4 z-50 flex items-center gap-3 font-mono text-xs">

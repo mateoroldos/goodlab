@@ -23,7 +23,7 @@
 
 <div class="flex min-h-full flex-col">
 	<main class="mx-auto w-full max-w-2xl flex-1 px-8 py-16">
-		<header class="mb-10 border-b border-border pb-10">
+		<header class="mb-6 pb-6">
 			<h1 class="mb-3 text-3xl font-semibold tracking-tight">{data.series.title}</h1>
 			<p class="text-sm leading-6 text-muted-foreground">{data.series.description}</p>
 		</header>
