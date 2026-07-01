@@ -33,7 +33,17 @@
 		...restProps
 	}: Props = $props();
 
-	const sounds = soundContext.get();
+	const optionalSounds = () => {
+		if (!withSounds) return undefined;
+
+		try {
+			return soundContext.get();
+		} catch {
+			return undefined;
+		}
+	};
+
+	const sounds = optionalSounds();
 
 	let prevState: StateButtonState | undefined;
 	$effect(() => {
@@ -42,8 +52,8 @@
 
 		if (prev === undefined || prev === externalState) return;
 
-		if (externalState === 'success' && withSounds) sounds.play('ui.success');
-		if (externalState === 'error' && withSounds) sounds.play('ui.error');
+		if (externalState === 'success' && withSounds) sounds?.play('ui.success');
+		if (externalState === 'error' && withSounds) sounds?.play('ui.error');
 	});
 
 	const shakeOnErrorTransition: Attachment = (element) => {

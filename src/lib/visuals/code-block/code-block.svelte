@@ -6,7 +6,8 @@
 		dimmed?: boolean;
 	}
 
-	export type SupportedLanguage = 'javascript' | 'typescript' | 'svelte' | 'html' | 'css' | 'json';
+	// eslint-disable-next-line no-import-assign -- re-export, not an assignment
+	export type { SupportedLanguage } from './code-highlighter.js';
 
 	export interface CodeBlockState {
 		language: SupportedLanguage;
@@ -15,36 +16,15 @@
 </script>
 
 <script lang="ts">
-	import css from '@shikijs/langs/css';
-	import html from '@shikijs/langs/html';
-	import javascript from '@shikijs/langs/javascript';
-	import json from '@shikijs/langs/json';
-	import svelte from '@shikijs/langs/svelte';
-	import typescript from '@shikijs/langs/typescript';
-	import catppuccinMocha from '@shikijs/themes/catppuccin-mocha';
-	import dracula from '@shikijs/themes/dracula';
-	import githubDarkDefault from '@shikijs/themes/github-dark-default';
-	import gruvboxDarkMedium from '@shikijs/themes/gruvbox-dark-medium';
-	import nord from '@shikijs/themes/nord';
-	import rosePine from '@shikijs/themes/rose-pine';
-	import solarizedLight from '@shikijs/themes/solarized-light';
-	import tokyoNight from '@shikijs/themes/tokyo-night';
-	import vesper from '@shikijs/themes/vesper';
 	import { quintOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
-	import { createHighlighterCore } from 'shiki/core';
-	import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 	import { themeContext } from '$lib/themes/theme.svelte.js';
 	import { cn } from '$lib/utils.js';
-
-	const supportedLanguages = [
-		'javascript',
-		'typescript',
-		'svelte',
-		'html',
-		'css',
-		'json'
-	] as const satisfies readonly SupportedLanguage[];
+	import {
+		getCodeHighlighter,
+		supportedLanguages,
+		type SupportedLanguage
+	} from './code-highlighter.js';
 
 	interface Token {
 		content: string;
@@ -53,22 +33,6 @@
 	}
 
 	type TokenLine = Token[];
-
-	const highlighter = createHighlighterCore({
-		engine: createJavaScriptRegexEngine(),
-		langs: [javascript, typescript, svelte, html, css, json],
-		themes: [
-			vesper,
-			gruvboxDarkMedium,
-			catppuccinMocha,
-			dracula,
-			githubDarkDefault,
-			nord,
-			rosePine,
-			tokyoNight,
-			solarizedLight
-		]
-	});
 
 	const normalizeLang = (language: SupportedLanguage): SupportedLanguage => {
 		const lang = language.trim().toLowerCase();
@@ -82,7 +46,7 @@
 		state: CodeBlockState;
 	}
 
-	// eslint-disable-next-line svelte/no-unused-props -- false positive: `language` and `lines` are used through the `codeState` alias. Tracked in eslint-plugin-svelte#1142 / #1172.
+	// eslint-disable-next-line svelte/no-unused-props -- language and lines accessed via codeState alias
 	const { state: codeState }: Props = $props();
 	const theme = themeContext.get();
 
@@ -99,7 +63,7 @@
 		let cancelled = false;
 
 		const highlight = async () => {
-			const shiki = await highlighter;
+			const shiki = await getCodeHighlighter();
 			const lang = normalizeLang(language);
 
 			if (cancelled) return;
