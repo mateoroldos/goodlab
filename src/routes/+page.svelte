@@ -7,6 +7,7 @@
 	import SiteHeader from '$lib/components/site-header.svelte';
 	import YoutubeMusic from '$lib/components/youtube-music/youtube-music.svelte';
 	import { series } from '$lib/content/catalog.js';
+	import { completedCount, progressContext } from '$lib/progress/progress.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
 	import type { PageData } from './$types';
@@ -15,6 +16,7 @@
 	const intro = 'A quiet lab exploring software craft, good code, and better ways to think.';
 
 	const shortcuts = shortcutContext.get();
+	const progress = progressContext.get();
 
 	onMount(() =>
 		shortcuts.register(
@@ -83,6 +85,8 @@
 			</div>
 			<ul class="m-0 list-none border-t border-border p-0">
 				{#each series as item, i (item.slug)}
+					{@const done = completedCount(progress, item)}
+					{@const complete = done > 0 && done === item.episodes.length}
 					<li in:fly={{ y: 8, duration: 280, delay: 140 + i * 60, easing: quintOut, opacity: 0 }}>
 						<a
 							href={resolve(`/series/${item.slug}`)}
@@ -94,8 +98,22 @@
 								{String(i + 1).padStart(3, '0')}
 							</span>
 							<span class="flex flex-1 flex-col gap-1.5">
-								<span class="font-medium tracking-tight">{item.title}</span>
+								<span class="font-medium tracking-tight">
+									{item.title}
+									{#if complete}
+										<span class="ml-1 font-mono text-xs text-primary/80">✓</span>
+									{/if}
+								</span>
 								<span class="text-sm text-muted-foreground">{item.description}</span>
+							</span>
+							<!-- Fixed width so rows align whether or not a count is shown. -->
+							<span
+								class={[
+									'mt-0.5 w-8 shrink-0 text-right font-mono text-xs transition-colors duration-150 ease-out',
+									complete ? 'text-primary/60' : 'text-muted-foreground/40'
+								]}
+							>
+								{done === 0 ? '' : `${done}/${item.episodes.length}`}
 							</span>
 							<Kbd class="mt-0.5 shrink-0">{i + 1}</Kbd>
 						</a>

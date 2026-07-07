@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { progressContext } from '$lib/progress/progress.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
 	import type { PageData } from './$types';
@@ -9,6 +10,7 @@
 	const { data }: { data: PageData } = $props();
 
 	const shortcuts = shortcutContext.get();
+	const progress = progressContext.get();
 
 	onMount(() =>
 		shortcuts.register(
@@ -38,18 +40,27 @@
 			</div>
 			<ol class="m-0 list-none border-t border-border p-0">
 				{#each data.series.episodes as episode, i (episode.slug)}
+					{@const status = progress.status(data.series.slug, episode.slug)}
 					<li>
 						<a
 							href={resolve(`/series/${data.series.slug}/e/${episode.slug}`)}
 							class="group flex items-start gap-5 border-b border-border py-5 text-foreground no-underline transition-colors duration-150 hover:bg-muted/30"
 						>
 							<span
-								class="w-8 shrink-0 pt-0.5 text-right font-mono text-xs text-muted-foreground/30"
+								class={[
+									'w-8 shrink-0 pt-0.5 text-right font-mono text-xs transition-colors duration-150 ease-out',
+									status === 'untouched' ? 'text-muted-foreground/30' : 'text-muted-foreground/60'
+								]}
 							>
 								{String(i + 1).padStart(3, '0')}
 							</span>
 							<span class="flex flex-1 flex-col gap-1.5">
-								<span class="font-medium tracking-tight">{episode.title}</span>
+								<span class="font-medium tracking-tight">
+									{episode.title}
+									{#if status === 'completed'}
+										<span class="ml-1 font-mono text-xs text-primary/80">✓</span>
+									{/if}
+								</span>
 								<span class="text-sm text-muted-foreground">{episode.description}</span>
 							</span>
 							<Kbd class="mt-0.5 shrink-0">{i + 1}</Kbd>
