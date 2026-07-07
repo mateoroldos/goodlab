@@ -181,10 +181,16 @@
 		<aside class="flex overflow-hidden">
 			<ProgressRail />
 			<div class="relative min-h-0 flex-1">
+				<div
+					class="pointer-events-none absolute top-0 left-0 right-0 h-30 bg-gradient-to-b from-background to-transparent z-10"
+				></div>
 				<ListenPill {narrationAvailable} isComplete={player.isComplete} />
 				<ScrollArea class="h-full">
 					<Narration {nextEpisode} {series} />
 				</ScrollArea>
+				<div
+					class="pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-10"
+				></div>
 			</div>
 		</aside>
 

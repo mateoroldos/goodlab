@@ -41,7 +41,7 @@
 
 {#if narrationAvailable && !isComplete}
 	<div
-		class="absolute left-0 right-0 top-4 z-10 flex justify-center px-4"
+		class="absolute z-20 left-0 right-0 top-4 z-10 flex justify-center px-4"
 		in:fade={{ duration: 200, easing: quintOut }}
 	>
 		{#if !narrator.listening}
