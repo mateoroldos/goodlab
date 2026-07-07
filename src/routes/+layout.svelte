@@ -7,6 +7,7 @@
 	import UserMenu from '$lib/components/user-menu.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import SiteFooter from '$lib/components/site-footer.svelte';
+	import ProgressProvider from '$lib/progress/progress-provider.svelte';
 	import ThemeProvider from '$lib/themes/theme-provider.svelte';
 	import SoundEffects from '$lib/sounds/sound-effects.svelte';
 	import Shortcuts from '$lib/shortcuts/shortcuts.svelte';
@@ -50,7 +51,9 @@
 							</Button>
 						{/if}
 					</nav>
-					{@render children()}
+					<ProgressProvider signedIn={Boolean(data.user)} initial={data.progress}>
+						{@render children()}
+					</ProgressProvider>
 				</div>
 				<SiteFooter />
 			</div>
