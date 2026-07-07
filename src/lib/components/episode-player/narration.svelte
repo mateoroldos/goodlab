@@ -13,6 +13,8 @@
 		WarningIcon
 	} from 'phosphor-svelte';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
 	import type { EpisodeSummary, SeriesSummary } from '$lib/content/catalog.js';
@@ -352,6 +354,19 @@
 						<Kbd>H</Kbd>
 					</Button>
 				</div>
+			{/if}
+
+			{#if !page.data.user}
+				<!-- The moment motivation peaks — right after finishing. One quiet line, no modal. -->
+				<p class="m-0 text-xs leading-relaxed text-muted-foreground/50">
+					<button
+						class="cursor-pointer underline underline-offset-2 transition-colors duration-150 hover:text-muted-foreground"
+						onclick={() => void authClient.signIn.social({ provider: 'github' })}
+					>
+						Sign in
+					</button>
+					to keep track of finished episodes.
+				</p>
 			{/if}
 		</section>
 	{/if}
