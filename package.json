@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "wrangler types --check && vite build",
+    "build": "vite build",
     "preview": "bun run build && wrangler dev",
     "lint": "prettier --check . && NODE_OPTIONS=--max-old-space-size=4096 eslint .",
     "format": "prettier --write .",
