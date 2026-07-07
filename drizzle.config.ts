@@ -2,7 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 import process from 'node:process';
 
 export default defineConfig({
-	schema: './src/lib/server/auth-schema.ts',
+	schema: ['./src/lib/server/auth-schema.ts', './src/lib/server/progress-schema.ts'],
 	out: './drizzle',
 	dialect: 'sqlite',
 	driver: 'd1-http',
