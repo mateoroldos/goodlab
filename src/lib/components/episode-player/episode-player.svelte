@@ -14,6 +14,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Kbd } from '$lib/components/ui/kbd/index.js';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
+	import { progressContext } from '$lib/progress/progress.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import { shortcutContext } from '$lib/shortcuts/shortcut-registry.svelte.js';
 	import Narration from './narration.svelte';
@@ -39,6 +40,13 @@
 	}));
 	const sounds = soundContext.get();
 	const shortcuts = shortcutContext.get();
+	const progress = progressContext.get();
+
+	// Sync progress to storage. Completion can arrive from read mode (keypress)
+	// or listen mode (narrator advancing), so watch the player's derived flag.
+	$effect(() => {
+		if (series && player.isComplete) progress.markCompleted(series.slug, episode.slug);
+	});
 
 	playerContext.set(player);
 	narratorContext.set(narrator);
@@ -62,6 +70,8 @@
 	);
 
 	onMount(() => {
+		if (series) progress.markStarted(series.slug, episode.slug);
+
 		const unregister = shortcuts.register([
 			{
 				key: 'j',
