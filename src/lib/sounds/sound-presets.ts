@@ -14,9 +14,14 @@ interface NoteOpts {
 	cutoff: number;
 }
 
+interface PresetOpts {
+	pitch?: number;
+}
+
 // One voice: oscillator → lowpass → gain. The 4ms linear attack removes start
 // clicks; the lowpass keeps square/triangle waves warm instead of harsh.
-function note(ctx: AudioContext, opts: NoteOpts): void {
+function note(ctx: AudioContext, opts: NoteOpts, preset?: PresetOpts): void {
+	const pitch = preset?.pitch ?? 1;
 	const osc = ctx.createOscillator();
 	const filter = ctx.createBiquadFilter();
 	const gain = ctx.createGain();
@@ -28,9 +33,9 @@ function note(ctx: AudioContext, opts: NoteOpts): void {
 	filter.type = 'lowpass';
 	filter.frequency.value = opts.cutoff;
 
-	osc.frequency.setValueAtTime(opts.freq, opts.start);
+	osc.frequency.setValueAtTime(opts.freq * pitch, opts.start);
 	if (opts.glideTo !== undefined) {
-		osc.frequency.exponentialRampToValueAtTime(opts.glideTo, opts.start + opts.dur * 0.8);
+		osc.frequency.exponentialRampToValueAtTime(opts.glideTo * pitch, opts.start + opts.dur * 0.8);
 	}
 
 	gain.gain.setValueAtTime(0.0001, opts.start);
@@ -44,7 +49,7 @@ function note(ctx: AudioContext, opts: NoteOpts): void {
 /** Synth preset definitions. `t` is the scheduled start (ctx.currentTime + latency). */
 export const SYNTH_PRESETS: Record<
 	SynthPreset,
-	(ctx: AudioContext, t: number, vol: number) => void
+	(ctx: AudioContext, t: number, vol: number, pitch?: number) => void
 > = {
 	// Rising C-major arpeggio (C5 E5 G5) — a tiny, gentle power-up
 	success: (ctx, t, vol) => {
@@ -126,21 +131,29 @@ export const SYNTH_PRESETS: Record<
 	},
 
 	// Tiny upward blip (C5 → D5) — one more actor joins the room
-	pop: (ctx, t, vol) => {
-		note(ctx, {
-			start: t,
-			dur: 0.06,
-			freq: 523,
-			glideTo: 587,
-			type: 'triangle',
-			peak: vol * 0.4,
-			cutoff: 2200
-		});
+	pop: (ctx, t, vol, pitch) => {
+		note(
+			ctx,
+			{
+				start: t,
+				dur: 0.06,
+				freq: 523,
+				glideTo: 587,
+				type: 'triangle',
+				peak: vol * 0.4,
+				cutoff: 2200
+			},
+			{ pitch }
+		);
 	},
 
 	// Short neutral tick — states multiplying, calm breaking
-	tick: (ctx, t, vol) => {
-		note(ctx, { start: t, dur: 0.05, freq: 440, type: 'square', peak: vol * 0.34, cutoff: 1600 });
+	tick: (ctx, t, vol, pitch) => {
+		note(
+			ctx,
+			{ start: t, dur: 0.05, freq: 440, type: 'square', peak: vol * 0.34, cutoff: 1600 },
+			{ pitch }
+		);
 	},
 
 	// Muted key tap (A3 falling, heavily lowpassed) — writing in the quiet room.

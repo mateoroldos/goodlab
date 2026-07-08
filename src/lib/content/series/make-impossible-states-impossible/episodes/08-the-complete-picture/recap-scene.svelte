@@ -57,6 +57,7 @@
 	import ExplainerGraph from '$lib/visuals/explainer-graph/explainer-graph.svelte';
 	import FileCard from '$lib/visuals/file-card/file-card.svelte';
 	import StateBadge from '$lib/visuals/state-badge/state-badge.svelte';
+	import type { ActionState } from '$lib/visuals/action-state.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import {
 		saveWorkflowGraph,
@@ -70,6 +71,12 @@
 
 	const { state }: Props = $props();
 	const sounds = soundContext.get();
+	const badgeState = (value: RecapNodeId): ActionState => {
+		if (value === 'saving') return 'pending';
+		if (value === 'saved') return 'success';
+		if (value === 'failed') return 'error';
+		return 'idle';
+	};
 
 	let prevEdge: RecapSceneState['activeEdge'];
 	let prevBlocked: boolean | undefined;
@@ -305,7 +312,7 @@
 				<span class="font-mono text-xs text-muted-foreground/40">state:</span>
 				{#if state.currentNode}
 					<div in:fly={{ x: -6, duration: 200, easing: quintOut }}>
-						<StateBadge value={state.currentNode} />
+						<StateBadge state={badgeState(state.currentNode)}>{state.currentNode}</StateBadge>
 					</div>
 				{/if}
 			</div>
@@ -331,7 +338,7 @@
 							<span class="text-2xs text-muted-foreground/25">›</span>
 						{/if}
 						<div in:fly={{ x: -8, duration: 200, easing: quintOut }}>
-							<StateBadge value={snap} showIcon={false} />
+							<StateBadge state={badgeState(snap)} showIcon={false}>{snap}</StateBadge>
 						</div>
 					{/each}
 				</div>

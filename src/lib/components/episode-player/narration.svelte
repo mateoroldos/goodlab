@@ -270,10 +270,7 @@
 							<!-- Ask paragraphs pause so the reader can predict before pressing. -->
 							{#if narrating && narrator.waiting}
 								<p
-									class={[
-										'mt-3 flex items-center gap-1.5 text-xs',
-										'font-medium text-primary/80'
-									]}
+									class={['mt-3 flex items-center gap-1.5 text-xs', 'font-medium text-primary/80']}
 									in:fade={{ duration: 300, easing: quintOut }}
 								>
 									<span>Think, then Space to reveal</span>

@@ -36,6 +36,7 @@
 	import ExplainerGraph from '$lib/visuals/explainer-graph/explainer-graph.svelte';
 	import FileCard from '$lib/visuals/file-card/file-card.svelte';
 	import StateBadge from '$lib/visuals/state-badge/state-badge.svelte';
+	import type { ActionState } from '$lib/visuals/action-state.js';
 	import { soundContext } from '$lib/sounds/sound-effects.svelte.js';
 	import {
 		saveWorkflowGraph,
@@ -49,6 +50,12 @@
 
 	const { state }: Props = $props();
 	const sounds = soundContext.get();
+	const badgeState = (value: ActorNodeId): ActionState => {
+		if (value === 'saving') return 'pending';
+		if (value === 'saved') return 'success';
+		if (value === 'failed') return 'error';
+		return 'idle';
+	};
 
 	let prevActorValue: ActorSceneState['actorValue'];
 	$effect(() => {
@@ -219,7 +226,7 @@
 					>
 					{#if value}
 						<div in:fly={{ y: 6, duration: 220, easing: quintOut }}>
-							<StateBadge {value} />
+							<StateBadge state={badgeState(value)}>{value}</StateBadge>
 						</div>
 					{:else}
 						<span class="font-mono text-xs text-muted-foreground/20">—</span>
@@ -281,7 +288,7 @@
 					<span class="font-mono text-xs text-muted-foreground/40">state:</span>
 					{#if state.actorValue}
 						<div in:fly={{ x: -6, duration: 200, easing: quintOut }}>
-							<StateBadge value={state.actorValue} />
+							<StateBadge state={badgeState(state.actorValue)}>{state.actorValue}</StateBadge>
 						</div>
 					{:else}
 						<span class="font-mono text-xs text-muted-foreground/25">not started</span>
@@ -297,7 +304,7 @@
 									<span class="text-2xs text-muted-foreground/25">›</span>
 								{/if}
 								<div in:fly={{ x: -8, duration: 200, easing: quintOut }}>
-									<StateBadge value={snap} showIcon={false} />
+									<StateBadge state={badgeState(snap)} showIcon={false}>{snap}</StateBadge>
 								</div>
 							{/each}
 						</div>

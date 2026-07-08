@@ -23,9 +23,8 @@
 	import { CheckIcon, SpinnerGapIcon, WarningIcon } from 'phosphor-svelte';
 	import CodeBlock from '$lib/visuals/code-block/code-block.svelte';
 	import FileCard from '$lib/visuals/file-card/file-card.svelte';
-	import StateButton, {
-		type StateButtonState
-	} from '$lib/visuals/state-button/state-button.svelte';
+	import StateButton from '$lib/visuals/state-button/state-button.svelte';
+	import type { ActionState } from '$lib/visuals/action-state.js';
 
 	interface Props {
 		state: SaveStateSceneState;
@@ -37,7 +36,7 @@
 
 	// Contradiction shows both signals simultaneously: spinning loader (isSaving=true)
 	// + error colors (hasError=true). The mismatch is the lesson.
-	const buttonState = $derived.by((): StateButtonState => {
+	const buttonState = $derived.by((): ActionState => {
 		if (isContradiction) return 'pending';
 		if (state.isSaving) return 'pending';
 		if (state.hasError) return 'error';
