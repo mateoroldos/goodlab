@@ -18,6 +18,13 @@
 	],
 	"env": {
 		"production": {
+			"workers_dev": false,
+			"routes": [
+				{
+					"pattern": "goodlab.cc",
+					"custom_domain": true
+				}
+			],
 			"d1_databases": [
 				{
 					"binding": "DB",
