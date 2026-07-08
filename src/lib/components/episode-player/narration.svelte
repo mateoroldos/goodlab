@@ -267,20 +267,16 @@
 							>
 								{@render renderParagraph(para, true, narrating)}
 							</p>
-							<!-- Inline hint shown while narrator is waiting at end of this paragraph.
-							     Asks also hint in read mode: the next keypress reveals the answer,
-							     so the reader should predict before pressing. -->
+							<!-- Ask paragraphs pause so the reader can predict before pressing. -->
 							{#if narrating && narrator.waiting}
 								<p
 									class={[
 										'mt-3 flex items-center gap-1.5 text-xs',
-										narrator.asking ? 'font-medium text-primary/80' : 'text-muted-foreground/50'
+										'font-medium text-primary/80'
 									]}
 									in:fade={{ duration: 300, easing: quintOut }}
 								>
-									<span
-										>{narrator.asking ? 'Think, then Space to reveal' : 'Space to continue'}</span
-									>
+									<span>Think, then Space to reveal</span>
 									<ArrowRightIcon size={10} />
 								</p>
 							{:else if active && !narrator.listening && isAsk(para)}

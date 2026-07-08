@@ -41,8 +41,8 @@ export type Span<S> =
  * One reader-visible paragraph. Either a plain array of spans, or a config
  * carrying paragraph-level meaning:
  * - `speaker` — who says it (defaults to the guide).
- * - `ask` — a question paragraph: the narrator always pauses after it, even
- *   with auto-play on, so the reader predicts before the next paragraph reveals.
+ * - `ask` — a question paragraph: the narrator pauses after it so the reader
+ *   predicts before the next paragraph reveals.
  */
 export interface ParagraphConfig<S = any> {
 	spans: Array<Span<S>>;

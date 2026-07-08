@@ -56,23 +56,15 @@
 				<Kbd>Space</Kbd>
 			</button>
 		{:else if narrator.waiting}
-			<!-- Waiting: accent invitation to continue -->
+			<!-- Waiting: ask paragraphs pause for prediction before reveal. -->
 			<div class={pill({ state: 'waiting' })} in:fade={{ duration: 180, easing: quintOut }}>
 				<button
 					class="flex items-center gap-2 text-sm font-medium text-primary transition-colors duration-150 hover:text-primary/80"
 					onclick={() => narrator.toggle()}
-					aria-label={narrator.asking ? 'Reveal the answer' : 'Continue to next paragraph'}
+					aria-label="Reveal the answer"
 				>
-					<span>{narrator.asking ? 'Reveal' : 'Continue'}</span>
+					<span>Reveal</span>
 					<Kbd>Space</Kbd>
-				</button>
-				<span class="text-border/60">|</span>
-				<button
-					class={control({ active: narrator.autoPlay, class: 'rounded px-1.5 py-0.5' })}
-					onclick={() => narrator.toggleAutoPlay()}
-					title={narrator.autoPlay ? 'Auto-play on' : 'Auto-play off'}
-				>
-					Auto
 				</button>
 				<span class="text-border/60">|</span>
 				<button class={control()} onclick={() => narrator.exit()} aria-label="Exit listen mode">

@@ -13,9 +13,9 @@ import {
 import { paragraphAnchors } from './anchors.js';
 import { narrationKey, type NarrationManifest } from './clips.js';
 
-/** Breath before auto-advancing to the next paragraph. */
+/** Breath before advancing to the next paragraph. */
 const breathSeconds = 0.4;
-/** Longer breath when crossing a chapter boundary in auto-play mode. */
+/** Longer breath when crossing a chapter boundary. */
 const breathChapterSeconds = 0.7;
 /** Grace window past the alignment end before we clamp the audio, suppressing ElevenLabs tail bleed. */
 const audioClampGrace = 0.15;
@@ -52,9 +52,8 @@ export interface NarrationSlugs {
  * passed) and `charIdx` (word cursor for the text sweep). Nothing is fired
  * imperatively — pause, resume, and seeks stay correct by construction.
  *
- * After audio finishes, if `autoPlay` is off the narrator enters `waiting`
- * and stops the RAF loop. Space (toggle) or seek advances to the next paragraph.
- * With `autoPlay` on, the old breath-then-advance behavior is preserved.
+ * After audio finishes, the narrator waits for a short breath and advances.
+ * Question paragraphs still enter `waiting` so the reader can predict before revealing.
  */
 export class Narrator {
   readonly #player: Player;
@@ -74,8 +73,6 @@ export class Narrator {
   aligned = $state(true);
   /** Playback progress 0–1 for the current paragraph's clip. */
   progress = $state(0);
-  /** When true, auto-advances after the breath instead of waiting. Persisted. */
-  readonly #autoPlay = new PersistedState('narrator:autoPlay', false);
   /** Playback rate. Persisted. */
   readonly #rate = new PersistedState<Rate>('narrator:rate', 1, { serializer: rateSerializer });
 
@@ -112,10 +109,6 @@ export class Narrator {
   /** True when audio finished and we're holding for the user to press Space. */
   get waiting(): boolean {
     return this.status === 'waiting';
-  }
-
-  get autoPlay(): boolean {
-    return this.#autoPlay.current;
   }
 
   get rate(): Rate {
@@ -173,15 +166,6 @@ export class Narrator {
   play = (ci: number, pi: number): void => {
     this.status = 'playing';
     void this.#enter(ci, pi);
-  };
-
-  /** Toggle auto-play; if flipped on while waiting, immediately advances. */
-  toggleAutoPlay = (): void => {
-    this.#autoPlay.current = !this.#autoPlay.current;
-    if (this.status === 'waiting' && this.autoPlay) {
-      this.status = 'playing';
-      this.#advance();
-    }
   };
 
   /** Cycles through 1× → 1.25× → 1.5× → 1×. */
@@ -386,11 +370,10 @@ export class Narrator {
       this.progress = this.#duration > 0 ? Math.min(this.#time / this.#duration, 1) : 0;
 
       if (this.#time >= this.#duration) {
-        // Question paragraphs always hold for the reader's prediction,
-        // even with auto-play on.
+        // Question paragraphs always hold for the reader's prediction.
         const para = this.#player.chapters[this.chapterIdx]?.paragraphs[this.paragraphIdx];
         const holdForAsk = para !== undefined && isAsk(para);
-        if (!this.autoPlay || holdForAsk) {
+        if (holdForAsk) {
           // Check if there's a next paragraph — if not, just exit.
           const chapters = this.#player.chapters;
           const chapter = chapters[this.chapterIdx];
@@ -406,7 +389,7 @@ export class Narrator {
           }
         }
 
-        // Auto-play: wait for breath then advance
+        // Wait for breath then advance.
         const breath = this.#crossingChapter ? breathChapterSeconds : breathSeconds;
         if (this.#time >= this.#duration + breath) {
           this.#advance();
