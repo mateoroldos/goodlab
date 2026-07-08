@@ -12,7 +12,9 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "deploy": "bun run build && wrangler deploy --env production",
+    "deploy:production": "vite build && wrangler deploy --env production",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:production": "wrangler d1 migrations apply DB --env production --remote",
     "cf-typegen": "wrangler types",
     "narration:generate": "bun scripts/generate-narration.ts"
   },
