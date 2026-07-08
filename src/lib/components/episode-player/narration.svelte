@@ -29,6 +29,7 @@
 	import { paragraphAnchors, segRuns, type Seg, type SegRun } from '$lib/narration/anchors.js';
 	import { SPEAKERS, type SpeakerId } from '$lib/narration/speakers.js';
 	import { soundContext, type SoundId } from '$lib/sounds/sound-effects.svelte.js';
+	import { player as music } from '$lib/components/youtube-music/player-singleton.svelte.js';
 	import { parseInline, type IconMark } from './inline-marks.js';
 	import { scrollToCenter } from './scroll-to-center.js';
 
@@ -106,15 +107,19 @@
 			firedSounds.add(fireKey);
 			if (isIconMark(seg.text)) sounds.play(icons[seg.text].sound);
 		});
-		// Word-anchored span sounds (e.g. door effects)
+		// Word-anchored span sounds (e.g. door effects) and music actions.
 		paragraphSpans(para).forEach((span, i) => {
-			if (typeof span === 'string' || !span.sound) return;
-			const fireKey = `span:${i}`;
-			if (firedSounds.has(fireKey) || narrator.charIdx < anchors.spanStart[i]) return;
-			firedSounds.add(fireKey);
-			// SAFETY: `Span.sound` stays a loose string so episode.ts avoids importing the
-			// UI sound catalog; episode authors must use catalog keys.
-			sounds.play(span.sound as SoundId);
+			if (typeof span === 'string' || narrator.charIdx < anchors.spanStart[i]) return;
+			if (span.sound && !firedSounds.has(`sound:${i}`)) {
+				firedSounds.add(`sound:${i}`);
+				// SAFETY: `Span.sound` stays a loose string so episode.ts avoids importing the
+				// UI sound catalog; episode authors must use catalog keys.
+				sounds.play(span.sound as SoundId);
+			}
+			if (span.music === 'pause' && !firedSounds.has(`music:${i}`)) {
+				firedSounds.add(`music:${i}`);
+				music.fadeOut();
+			}
 		});
 	});
 </script>

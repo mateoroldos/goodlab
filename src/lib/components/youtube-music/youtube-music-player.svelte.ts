@@ -8,6 +8,8 @@ type YouTubePlayer = {
 	playVideo(): void;
 	pauseVideo(): void;
 	loadVideoById(id: string): void;
+	setVolume(volume: number): void;
+	getVolume(): number;
 	destroy(): void;
 };
 
@@ -109,6 +111,32 @@ export class YouTubeMusicPlayer {
 
 	prev = () => this.load((this.currentIdx - 1 + this.tracks.length) % this.tracks.length);
 	next = () => this.load((this.currentIdx + 1) % this.tracks.length);
+
+	/**
+	 * Fade the music out (~1.5s), then pause — the room going quiet.
+	 * No-op when nothing is playing. Volume is restored after the pause so a
+	 * later manual play returns at full level.
+	 */
+	fadeOut = () => {
+		const p = this.#player;
+		if (!p || !this.isPlaying) return;
+
+		const from = p.getVolume();
+		const start = performance.now();
+		const dur = 1500;
+		const step = (now: number) => {
+			// Bail into the pause if the user paused mid-fade — never leave volume low.
+			const t = this.isPlaying ? Math.min((now - start) / dur, 1) : 1;
+			p.setVolume(from * (1 - t));
+			if (t < 1) {
+				requestAnimationFrame(step);
+				return;
+			}
+			p.pauseVideo();
+			p.setVolume(from);
+		};
+		requestAnimationFrame(step);
+	};
 
 	#createPlayer() {
 		const api = (window as YouTubeWindow).YT;

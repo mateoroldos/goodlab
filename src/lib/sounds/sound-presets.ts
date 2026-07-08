@@ -12,6 +12,9 @@ interface NoteOpts {
 	type: OscillatorType;
 	peak: number;
 	cutoff: number;
+	/** Linear attack ramp in seconds. Default 4ms — just enough to remove clicks;
+	 *  long values turn a note into a swell (room.hum). */
+	attack?: number;
 }
 
 interface PresetOpts {
@@ -39,7 +42,7 @@ function note(ctx: AudioContext, opts: NoteOpts, preset?: PresetOpts): void {
 	}
 
 	gain.gain.setValueAtTime(0.0001, opts.start);
-	gain.gain.linearRampToValueAtTime(opts.peak, opts.start + 0.004);
+	gain.gain.linearRampToValueAtTime(opts.peak, opts.start + (opts.attack ?? 0.004));
 	gain.gain.exponentialRampToValueAtTime(0.001, opts.start + opts.dur);
 
 	osc.start(opts.start);
@@ -325,6 +328,41 @@ export const SYNTH_PRESETS: Record<
 			type: 'triangle',
 			peak: vol * 0.28,
 			cutoff: 700
+		});
+	},
+
+	// The room heard at last — a low C2 swell, its fifth and octave blooming
+	// above, then everything recedes. Slow attacks, no transients: the machines'
+	// idle voice noticed once the music stops, not a new event in the room.
+	// Weight sits on the 98/131Hz partials — the 65Hz root barely exists on
+	// laptop speakers, so it anchors rather than carries.
+	'room-hum': (ctx, t, vol) => {
+		note(ctx, {
+			start: t,
+			dur: 4.6,
+			freq: 65,
+			type: 'triangle',
+			peak: vol * 0.5,
+			cutoff: 340,
+			attack: 1.4
+		});
+		note(ctx, {
+			start: t + 0.5,
+			dur: 4.0,
+			freq: 98,
+			type: 'triangle',
+			peak: vol * 0.34,
+			cutoff: 480,
+			attack: 1.6
+		});
+		note(ctx, {
+			start: t + 1.0,
+			dur: 3.4,
+			freq: 131,
+			type: 'triangle',
+			peak: vol * 0.26,
+			cutoff: 620,
+			attack: 1.8
 		});
 	}
 };

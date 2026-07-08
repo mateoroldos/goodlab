@@ -14,11 +14,11 @@ import { paragraphAnchors } from './anchors.js';
 import { narrationKey, type NarrationManifest } from './clips.js';
 
 /** Breath before advancing to the next paragraph. */
-const breathSeconds = 0.4;
+const breathSeconds = 0.45;
 /** Longer breath when crossing a chapter boundary. */
-const breathChapterSeconds = 0.7;
+const breathChapterSeconds = 0.6;
 /** Grace window past the alignment end before we clamp the audio, suppressing ElevenLabs tail bleed. */
-const audioClampGrace = 0.15;
+const audioClampGrace = 3.5;
 
 export const RATES = [1, 1.25, 1.5, 1.75, 2] as const;
 export type Rate = (typeof RATES)[number];

@@ -37,7 +37,7 @@ export const SPEAKERS = {
 		name: 'John',
 		voice: {
 			voiceId: 'kLhAstPcnnPxqzk6gS5i',
-			settings: { similarity_boost: 0.75, stability: 0.5 }
+			settings: { similarity_boost: 0.85, stability: 0.7 }
 		}
 	},
 	learner: {

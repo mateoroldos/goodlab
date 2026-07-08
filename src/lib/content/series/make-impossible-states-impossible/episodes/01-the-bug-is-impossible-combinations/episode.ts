@@ -5,31 +5,35 @@ const singleButtonChapter = defineChapter<SaveStateSceneState>({
 	scene: SaveStateScene,
 	id: 'single-button',
 	title: 'What drives the button?',
-	initial: { focus: 'isSaving', hasError: false, isSaving: false, mode: 'single-flag' },
+	initial: { hasError: false, isSaving: false, mode: 'single-flag' },
 	paragraphs: [
 		[
 			stop(
-				"Come in, Ben — everyone's gone home. Best hour in the Goodlab... just the hum of the machines, and room to think.",
+				"There you are. Come in, Ben — everyone's gone home. Best hour in the Goodlab.",
 				{},
 				{ sound: 'door.open' }
-			)
+			),
+			' ',
+			stop('Let me show you why.', {}, { music: 'pause' })
+		],
+		[
+			stop('Hear that? Just the machines, still thinking.', {}, { sound: 'room.hum' }),
+			' My first computer was a secondhand tower that hummed exactly like this.'
 		],
 		say(
 			'learner',
-			"Staying late, John? ...And that's my code on your screen, isn't it? Is something wrong?"
+			"Funny — the computer room at my school hummed like this. I always stayed after class. ...Oh wait a second. That's my code on your screen, isn't it? Is something wrong?"
 		),
 		[
-			"Not wrong — not yet. It's your save button, your first feature. Clean, simple... I like it. Let's read it together."
-		],
-		['I see a first piece of state — `isSaving`.'],
-		[
-			'When the user clicks save, `isSaving` ',
-			at('flips to `true`', { isSaving: true }),
-			'. The button follows.'
+			"Not wrong — not yet. It's your save button, your first feature. Clean, simple... I like it. But it's hiding something. Let's find it together — we've got all night."
 		],
 		[
-			'And here — a second piece of state: ',
-			at('`hasError`', { focus: 'hasError', isSaving: false, mode: 'error-flag' }),
+			'I see here a first piece of state — ',
+			stop('`isSaving`', { focus: 'isSaving' }),
+			'. When the user clicks save, `isSaving` ',
+			stop('flips to `true`', { isSaving: true }),
+			'. The button follows. And here — a second piece of state: ',
+			stop('`hasError`', { focus: 'hasError', isSaving: false, mode: 'error-flag' }),
 			'. When a save fails, you ',
 			at('flip it to `true`', { hasError: true }),
 			' — and the button shows the error.'

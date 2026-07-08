@@ -35,6 +35,9 @@ export type Span<S> =
 			 *  or the stop is pressed through (read mode). Use for narrative sound cues like
 			 *  a door opening. Loose string so episode.ts stays free of UI layer imports. */
 			sound?: string;
+			/** Site-music action, same anchor timing as `sound`. `'pause'` fades the
+			 *  vinyl player out — John quieting the room. Listen mode only. */
+			music?: 'pause';
 	  };
 
 /**
@@ -67,7 +70,11 @@ export const isAsk = <S>(para: Paragraph<S>): boolean =>
 // ─── Authoring sugar ──────────────────────────────────────────────────────────
 
 /** Anchored stop: the reader stops on these words — one keypress — and the patch applies. */
-export function stop<S>(text: string, patch: Patch<S>, opts?: { sound?: string }): Span<S>;
+export function stop<S>(
+	text: string,
+	patch: Patch<S>,
+	opts?: { sound?: string; music?: 'pause' }
+): Span<S>;
 /**
  * Silent stop: no prose, the scene just changes on its own keypress. In listen
  * mode it fires `after` milliseconds past the previous stop (defaults to a
@@ -77,7 +84,7 @@ export function stop<S>(patch: Patch<S>, opts?: { after?: number }): Span<S>;
 export function stop<S>(
 	first: string | Patch<S>,
 	second?: Patch<S> | { after?: number },
-	opts?: { sound?: string }
+	opts?: { sound?: string; music?: 'pause' }
 ): Span<S> {
 	if (typeof first === 'string') {
 		// SAFETY: the anchored overload guarantees `second` is the patch when `first` is text.

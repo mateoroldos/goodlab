@@ -15,7 +15,8 @@ export type SynthPreset =
 	| 'door-close'
 	| 'door-knock'
 	| 'actor-start'
-	| 'actor-settle';
+	| 'actor-settle'
+	| 'room-hum';
 
 export type SoundConfig =
 	| { readonly kind: 'single'; readonly file: string; readonly volume?: number }
@@ -46,20 +47,23 @@ export const soundCatalog = {
 	// The actor coming alive / the blueprint at rest
 	'actor.start': { kind: 'synth', preset: 'actor-start', volume: 0.4 },
 	'actor.settle': { kind: 'synth', preset: 'actor-settle', volume: 0.3 },
+	// The machines' idle voice — a slow swell heard once, when the room goes
+	// quiet ("Hear that?"). It blooms and recedes; silence stays the default.
+	'room.hum': { kind: 'synth', preset: 'room-hum', volume: 0.9 },
 	// The craft — quiet writing. Synth, not the keyboard wavs: the recorded
 	// samples have hot broadband transients that trip output limiters (e.g.
 	// laptop smart-amp speaker protection), ducking the narration mid-speech.
 	// A tiny lowpassed tap has a controlled peak and can't trigger that.
 	'keyboard.type': { kind: 'synth', preset: 'type', volume: 0.6 },
 	// Icon grammar accents — fired when the narration sweep reaches an icon mark
-	'icon.bug': { kind: 'synth', preset: 'icon-bug', volume: 0.35 },
-	'icon.idea': { kind: 'synth', preset: 'icon-idea', volume: 0.35 },
-	'icon.rule': { kind: 'synth', preset: 'icon-rule', volume: 0.35 },
+	'icon.bug': { kind: 'synth', preset: 'icon-bug', volume: 0.55 },
+	'icon.idea': { kind: 'synth', preset: 'icon-idea', volume: 0.55 },
+	'icon.rule': { kind: 'synth', preset: 'icon-rule', volume: 0.55 },
 	// The room — the only physical sounds. The door is the threshold between
 	// the calm of the Goodlab and the chaos outside; only George triggers it.
-	'door.open': { kind: 'synth', preset: 'door-open', volume: 0.75 },
-	'door.close': { kind: 'synth', preset: 'door-close', volume: 0.7 },
-	'door.knock': { kind: 'synth', preset: 'door-knock', volume: 0.7 }
+	'door.open': { kind: 'synth', preset: 'door-open', volume: 0.9 },
+	'door.close': { kind: 'synth', preset: 'door-close', volume: 0.9 },
+	'door.knock': { kind: 'synth', preset: 'door-knock', volume: 0.9 }
 } as const satisfies Record<string, SoundConfig>;
 
 export type SoundId = keyof typeof soundCatalog;

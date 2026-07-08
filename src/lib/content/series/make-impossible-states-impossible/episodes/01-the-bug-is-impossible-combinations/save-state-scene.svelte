@@ -67,17 +67,14 @@
 		}
 
 		if (state.mode === 'error-flag' || state.mode === 'ghost') {
-			const bothSetters = state.isSaving && state.hasError;
+			// Each setter line follows its own flag, so a lone hasError flip
+			// (episode 1's error walk) shows its line just like the ghost case.
 			return [
 				{ id: 'decl-saving', content: 'const [isSaving, setIsSaving] = useState(false)' },
 				{ id: 'decl-error', content: 'const [hasError, setHasError] = useState(false)' },
-				...(state.isSaving
-					? [
-							{ id: 'blank', content: '' },
-							{ id: 'setter-saving', content: 'setIsSaving(true)' },
-							...(bothSetters ? [{ id: 'setter-error', content: 'setHasError(true)' }] : [])
-						]
-					: [])
+				...(state.isSaving || state.hasError ? [{ id: 'blank', content: '' }] : []),
+				...(state.isSaving ? [{ id: 'setter-saving', content: 'setIsSaving(true)' }] : []),
+				...(state.hasError ? [{ id: 'setter-error', content: 'setHasError(true)' }] : [])
 			];
 		}
 
@@ -133,10 +130,15 @@
 	// focus point per moment — the focus field decides, the scene maps it.
 	const codeFocusIds = $derived.by((): ReadonlySet<string> => {
 		const { mode, isSaving, hasError, focus } = state;
-		if (mode === 'single-flag') return new Set(isSaving ? ['setter'] : ['decl']);
+		if (mode === 'single-flag') {
+			if (isSaving) return new Set(['setter']);
+			if (focus === 'isSaving') return new Set(['decl']);
+			return new Set();
+		}
 		if (mode === 'error-flag' || mode === 'ghost') {
 			if (isSaving)
 				return new Set(hasError ? ['setter-saving', 'setter-error'] : ['setter-saving']);
+			if (hasError) return new Set(['setter-error']);
 			if (focus === 'isSaving') return new Set(['decl-saving']);
 			if (focus === 'hasError') return new Set(['decl-error']);
 			if (focus === 'contradiction') return new Set(['decl-saving', 'decl-error']);
