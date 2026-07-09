@@ -18,6 +18,9 @@
 	],
 	"env": {
 		"production": {
+			"vars": {
+				"PUBLIC_GA_MEASUREMENT_ID": "G-7CQVD50X8D"
+			},
 			"workers_dev": false,
 			"routes": [
 				{

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { onNavigate } from '$app/navigation';
+	import { env } from '$env/dynamic/public';
 	import { GithubLogoIcon } from 'phosphor-svelte';
 	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button';
@@ -13,6 +14,17 @@
 	import YouTubeMusicMount from '$lib/components/youtube-music/youtube-music-mount.svelte';
 
 	const { children, data } = $props();
+	const gaId = env.PUBLIC_GA_MEASUREMENT_ID;
+	const gaSnippet = gaId
+		? `<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag('js', new Date());
+			gtag('config', ${JSON.stringify(gaId)});
+		</scr${'ipt'}>`
+		: '';
 
 	async function signInWithGitHub() {
 		await authClient.signIn.social({
@@ -32,7 +44,14 @@
 	});
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+	<link rel="icon" href={favicon} />
+	{#if gaId}
+		<script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- GA snippet is built from a JSON-encoded public env var, not user content. -->
+		{@html gaSnippet}
+	{/if}
+</svelte:head>
 <YouTubeMusicMount />
 <ThemeProvider>
 	<SoundEffects>
